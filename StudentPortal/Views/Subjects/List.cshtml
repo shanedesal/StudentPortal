@@ -4,16 +4,24 @@
 @{
 }
 @model List<StudentPortal.Models.Entities.Subject>
-
 <h1>Subjects</h1>
+<div>
+    <div>
+        <a asp-controller="Subjects" asp-action="Add" class="btn btn-primary">Add Subject</a>
+    </div>
+</div>
 
 <table class="table">
     <thead>
         <tr>
             <th>Subject Code</th>
+            <th>Description</th>
             <th>Units</th>
-            <th>Course Code</th>
+            <th>Offering</th>
             <th>Category</th>
+            <th>Course Code</th>
+            <th>Curriculum Year</th>
+            <th>Pre-requisite</th>
         </tr>
     </thead>
     <tbody>
@@ -21,9 +29,13 @@
         {
             <tr>
                 <td>@subject.SubjectCode</td>
+                <td>@subject.Description</td>
                 <td>@subject.Units</td>
+                <td>@subject.Offering</td>
+                <td>@subject.Category</td>
                 <td>@subject.CourseCode</td>
-                <td>@subject.Category</td>  
+                <td>@subject.CurriculumYear</td>
+                <td>@subject.PreRequisiteCode</td>
                 <td>
                     <a class="btn btn-primary" asp-controller="Subjects" asp-action="Edit" asp-route-id="@subject.SubjectCode">Edit</a>
                 </td>
@@ -31,3 +43,5 @@
         }
     </tbody>
 </table>
+
+

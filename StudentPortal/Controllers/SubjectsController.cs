@@ -13,39 +13,214 @@ namespace StudentPortal.Controllers
         {
             this.dBContext = dBContext;
         }
-        [HttpGet]
-        public IActionResult Add() 
+
+        public IActionResult Add(string searchTerm = null)
         {
-            return View();
-        } 
+            var subjects = string.IsNullOrEmpty(searchTerm)
+                ? dBContext.Subjects.ToList()
+                : dBContext.Subjects
+                          .Where(s => s.SubjectCode.Contains(searchTerm) || s.Description.Contains(searchTerm))
+                          .ToList();
+
+            var viewModel = new AddSubjectViewModel
+            {
+                SubjectsTable = subjects,
+                PreRequisiteCode = TempData["SelectedPreRequisite"]?.ToString()
+            };
+            return View(viewModel);
+        }
 
         [HttpPost]
         public async Task<IActionResult> Add(AddSubjectViewModel viewModel)
         {
-            var subject = new Subject
+            try
             {
-                SubjectCode = viewModel.SubjectCode,
-                Description = viewModel.Description,
-                Units = viewModel.Units,
-                Offering = viewModel.Offering,
-                Category = viewModel.Category,
-                CourseCode = viewModel.CourseCode,
-                CurriculumYear = viewModel.CurriculumYear,
-            };
-            await dBContext.Subjects.AddAsync(subject);
-            await dBContext.SaveChangesAsync();
+                // Validate PreRequisiteCode if provided
+                if (!string.IsNullOrEmpty(viewModel.PreRequisiteCode))
+                {
+                    var prerequisiteExists = await dBContext.Subjects
+                        .AnyAsync(s => s.SubjectCode == viewModel.PreRequisiteCode);
 
-            return View();
+                    if (!prerequisiteExists)
+                    {
+                        ModelState.AddModelError("PreRequisiteCode", "Invalid prerequisite subject code");
+                        viewModel.SubjectsTable = await dBContext.Subjects.ToListAsync();
+                        return View(viewModel);
+                    }
+                }
+
+                // Validate if subject code already exists
+                var subjectExists = await dBContext.Subjects
+                    .AnyAsync(s => s.SubjectCode == viewModel.SubjectCode);
+
+                if (subjectExists)
+                {
+                    ModelState.AddModelError("SubjectCode", "Subject code already exists");
+                    viewModel.SubjectsTable = await dBContext.Subjects.ToListAsync();
+                    return View(viewModel);
+                }
+
+                var subject = new Subject
+                {
+                    SubjectCode = viewModel.SubjectCode,
+                    Description = viewModel.Description,
+                    Units = viewModel.Units,
+                    Offering = viewModel.Offering,
+                    Category = viewModel.Category,
+                    CourseCode = viewModel.CourseCode,
+                    CurriculumYear = viewModel.CurriculumYear,
+                    PreRequisiteCode = string.IsNullOrEmpty(viewModel.PreRequisiteCode) ? null : viewModel.PreRequisiteCode
+                };
+
+                await dBContext.Subjects.AddAsync(subject);
+                await dBContext.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Subject added successfully";
+                return RedirectToAction("List");
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "An error occurred while saving the subject. Please try again.");
+                viewModel.SubjectsTable = await dBContext.Subjects.ToListAsync();
+                return View(viewModel);
+            }
         }
 
         [HttpGet]
         public async Task<IActionResult> List()
         {
-            var subjects = await dBContext.Subjects.ToListAsync();
-
+            var subjects = await dBContext.Subjects
+                .Include(s => s.PreRequisite)
+                .ToListAsync();
             return View(subjects);
-
         }
-        
+
+        // API endpoint for prerequisite validation
+        [HttpGet]
+        public async Task<IActionResult> ValidatePrerequisite(string code)
+        {
+            if (string.IsNullOrEmpty(code))
+                return Json(new { isValid = false });
+
+            var exists = await dBContext.Subjects
+                .AnyAsync(s => s.SubjectCode == code);
+
+            return Json(new { isValid = exists });
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Edit(string id)
+        {
+            if (string.IsNullOrEmpty(id))
+            {
+                return NotFound();
+            }
+
+            var subject = await dBContext.Subjects.FindAsync(id);
+            if (subject == null)
+            {
+                return NotFound();
+            }
+
+            // Get all subjects except the current one for prerequisites
+            var availableSubjects = await dBContext.Subjects
+                .Where(s => s.SubjectCode != id)
+                .ToListAsync();
+
+            var viewModel = new AddSubjectViewModel
+            {
+                SubjectCode = subject.SubjectCode,
+                Description = subject.Description,
+                Units = subject.Units,
+                Offering = subject.Offering,
+                Category = subject.Category,
+                CourseCode = subject.CourseCode,
+                CurriculumYear = subject.CurriculumYear,
+                PreRequisiteCode = subject.PreRequisiteCode,
+                SubjectsTable = availableSubjects
+            };
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Edit(string id, AddSubjectViewModel viewModel)
+        {
+            if (id != viewModel.SubjectCode)
+            {
+                return NotFound();
+            }
+
+            // Remove validation for SubjectsTable and SearchPreRequisiteCode
+            ModelState.Remove("SubjectsTable");
+            ModelState.Remove("SearchPreRequisiteCode");
+
+            if (!ModelState.IsValid)
+            {
+                viewModel.SubjectsTable = await dBContext.Subjects
+                    .Where(s => s.SubjectCode != id)
+                    .ToListAsync();
+                return View(viewModel);
+            }
+
+            try
+            {
+                // Validate PreRequisiteCode if provided
+                if (!string.IsNullOrEmpty(viewModel.PreRequisiteCode))
+                {
+                    var prerequisiteExists = await dBContext.Subjects
+                        .AnyAsync(s => s.SubjectCode == viewModel.PreRequisiteCode);
+
+                    if (!prerequisiteExists)
+                    {
+                        ModelState.AddModelError("PreRequisiteCode", "Invalid prerequisite subject code");
+                        viewModel.SubjectsTable = await dBContext.Subjects
+                            .Where(s => s.SubjectCode != id)
+                            .ToListAsync();
+                        return View(viewModel);
+                    }
+
+                    if (viewModel.PreRequisiteCode == id)
+                    {
+                        ModelState.AddModelError("PreRequisiteCode", "A subject cannot be its own prerequisite");
+                        viewModel.SubjectsTable = await dBContext.Subjects
+                            .Where(s => s.SubjectCode != id)
+                            .ToListAsync();
+                        return View(viewModel);
+                    }
+                }
+
+                var subject = await dBContext.Subjects.FindAsync(id);
+                if (subject == null)
+                {
+                    return NotFound();
+                }
+
+                // Update the subject properties
+                subject.Description = viewModel.Description;
+                subject.Units = viewModel.Units;
+                subject.Offering = viewModel.Offering;
+                subject.Category = viewModel.Category;
+                subject.CourseCode = viewModel.CourseCode;
+                subject.CurriculumYear = viewModel.CurriculumYear;
+                subject.PreRequisiteCode = string.IsNullOrEmpty(viewModel.PreRequisiteCode)
+                    ? null
+                    : viewModel.PreRequisiteCode;
+
+                dBContext.Entry(subject).State = EntityState.Modified;
+                await dBContext.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Subject updated successfully";
+                return RedirectToAction(nameof(List));
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "An error occurred while updating the subject. Please try again.");
+                viewModel.SubjectsTable = await dBContext.Subjects
+                    .Where(s => s.SubjectCode != id)
+                    .ToListAsync();
+                return View(viewModel);
+            }
+        }
     }
 }

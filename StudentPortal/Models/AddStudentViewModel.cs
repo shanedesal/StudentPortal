@@ -4,10 +4,13 @@ namespace StudentPortal.Models
 {
     public class AddStudentViewModel
     {
+        [Required(ErrorMessage = "Student ID is required.")]
+        public long StudentId { get; set; }
+
         [Required(ErrorMessage = "First Name is required.")]
         public string FirstName { get; set; }
 
-        public string MiddleName { get; set; }
+        public string? MiddleName { get; set; }
 
         [Required(ErrorMessage = "Last Name is required.")]
         public string LastName { get; set; }
@@ -17,5 +20,8 @@ namespace StudentPortal.Models
 
         [Required(ErrorMessage = "Course is required.")]
         public string Course { get; set; }
+
+        [Required(ErrorMessage = "Remarks is required.")]
+        public string Remarks { get; set; }
     }
 }

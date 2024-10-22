@@ -1,14 +1,16 @@
 ﻿@model StudentPortal.Models.AddSubjectViewModel
 
+<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
 <div class="container py-4" style="max-width: 800px">
-    <h1 class="h3 mb-4">Add Subject</h1>
+    <h1 class="h3 mb-4">Edit Subject</h1>
     <form method="post">
-        <!-- Subject Code -->
+        
+        <input type="hidden" asp-for="SubjectCode" />
         <div class="mb-3">
             <div class="form-floating">
-                <input type="text" class="form-control" asp-for="SubjectCode" placeholder="Subject Code" required />
-                <label asp-for="SubjectCode">Subject Code</label>
-                <span asp-validation-for="SubjectCode" class="text-danger"></span>
+                <input type="text" class="form-control" asp-for="SubjectCode" placeholder="Subject Code" readonly disabled/>
+                <label>Subject Code</label>
             </div>
         </div>
 
@@ -120,9 +122,27 @@
         </div>
 
         <!-- Submit Button -->
-        <div class="mb-3">
-            <button type="submit" class="btn btn-primary w-100 py-2">Save Subject</button>
+        <div class="row g-3">
+            <div class="col">
+                <button type="submit" class="btn btn-primary w-100 py-2">Save Changes</button>
+            </div>
+            <div class="col">
+                <a asp-action="List" class="btn btn-secondary w-100 py-2">Cancel</a>
+            </div>
         </div>
+
+        @if (!ViewContext.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach (var modelError in ViewContext.ModelState.Values.SelectMany(v => v.Errors))
+                    {
+                        <li>@modelError.ErrorMessage</li>
+                    }
+                </ul>
+            </div>
+        }
+
     </form>
 </div>
 
@@ -226,11 +246,36 @@
         }
     }
 
+    // Add this to your existing script section
+    $(document).ready(function () {
+        // Enable client-side validation
+        $.validator.unobtrusive.enable();
+
+        // Debug form submission
+        $('form').on('submit', function () {
+            console.log('Form submitted');
+            return $(this).valid();
+        });
+    });
+
     // Modify your form to include validation
+    // Replace your existing form submission script with this:
     document.querySelector('form').addEventListener('submit', async function (e) {
         e.preventDefault();
-        if (await validatePrerequisite()) {
-            this.submit();
+
+        // Debug log to check if event handler is triggered
+        console.log('Form submission attempted');
+
+        try {
+            const isValid = await validatePrerequisite();
+            console.log('Prerequisite validation result:', isValid);
+
+            if (isValid) {
+                // Remove the manual submit() call and let the form submit naturally
+                e.target.submit();
+            }
+        } catch (error) {
+            console.error('Validation error:', error);
         }
     });
 </script>
