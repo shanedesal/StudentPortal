@@ -6,7 +6,14 @@
         <!-- ID -->
         <div class="mb-3">
             <div class="form-floating">
-                <input type="text" class="form-control" asp-for="StudentId" placeholder="ID" />
+                <input type="text"
+                       class="form-control"
+                       asp-for="StudentId"
+                       placeholder="ID"
+                       maxlength="8"
+                       oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);"
+                       pattern="\d{8}"
+                       title="Please enter exactly 8 digits" />
                 <label asp-for="StudentId">ID</label>
                 <span asp-validation-for="StudentId" class="text-danger"></span>
             </div>
@@ -42,7 +49,13 @@
         <div class="row g-3 mb-3">
             <div class="col-md-6">
                 <div class="form-floating">
-                    <input type="text" class="form-control" asp-for="Year" placeholder="Year" />
+                    <select class="form-select" asp-for="Year" style="padding-top: 1rem;">
+                        <option value="">Select Year</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
                     <label asp-for="Year">Year</label>
                     <span asp-validation-for="Year" class="text-danger"></span>
                 </div>
@@ -65,8 +78,11 @@
             <div class="form-floating">
                 <select class="form-select" asp-for="Remarks" style="padding-top: 1rem;">
                     <option value="">Select Remarks</option>
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
+                    <option value="Shiftee">Shiftee</option>
+                    <option value="Transfereee">Transfereee</option>
+                    <option value="New">New</option>
+                    <option value="Old">Old</option>
+                    <option value="Cross-Enrollee">Cross-Enrollee</option>
                 </select>
                 <label asp-for="Remarks">Remarks</label>
                 <span asp-validation-for="Remarks" class="text-danger"></span>
@@ -74,9 +90,15 @@
         </div>
 
         <!-- Submit Button -->
-        <div class="mb-3">
-            <button type="submit" class="btn btn-primary w-100 py-2">Save</button>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <button type="submit" class="btn btn-outline-primary w-100 py-2">Save</button>
+            </div>
+            <div class="col-md-6">
+                <a asp-action="List" asp-controller="Students" class="btn btn-outline-secondary w-100 py-2">Cancel</a>
+            </div>
         </div>
+        
     </form>
 </div>
 
@@ -115,4 +137,29 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var studentIdInput = document.querySelector('[asp-for="StudentId"]');
+
+            studentIdInput.addEventListener('keypress', function(e) {
+                // Prevent entering more than 8 digits
+                if (this.value.length >= 8) {
+                    e.preventDefault();
+                }
+
+                // Allow only numbers
+                if (e.key < '0' || e.key > '9') {
+                    e.preventDefault();
+                }
+            });
+
+            studentIdInput.addEventListener('paste', function(e) {
+                e.preventDefault();
+                var pastedText = (e.clipboardData || window.clipboardData).getData('text');
+                var numbersOnly = pastedText.replace(/[^0-9]/g, '').slice(0, 8);
+                this.value = numbersOnly;
+            });
+        });
+    </script>
 }

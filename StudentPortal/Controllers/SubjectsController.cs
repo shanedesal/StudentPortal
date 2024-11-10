@@ -3,9 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using StudentPortal.Data;
 using StudentPortal.Models.Entities;
 using StudentPortal.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace StudentPortal.Controllers
 {
+    [Authorize]
     public class SubjectsController : Controller
     {
         private readonly ApplicationDBContext dBContext;
@@ -87,12 +89,49 @@ namespace StudentPortal.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> List()
+        public async Task<IActionResult> List(string sortOrder, string currentFilter, string searchString)
         {
-            var subjects = await dBContext.Subjects
+            // Save the sort order in ViewData
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["SubjectCodeSortParm"] = String.IsNullOrEmpty(sortOrder) ? "subject_code_desc" : "";
+            ViewData["DescriptionSortParm"] = sortOrder == "description" ? "description_desc" : "description";
+
+            // If search string is changed, reset page
+            if (searchString != null)
+            {
+                currentFilter = searchString;
+            }
+
+            // Save the filter in ViewData
+            ViewData["CurrentFilter"] = currentFilter;
+
+            // Get the base query
+            var subjects = dBContext.Subjects
                 .Include(s => s.PreRequisite)
-                .ToListAsync();
-            return View(subjects);
+                .AsQueryable();
+
+            // Apply search filter if provided
+            if (!String.IsNullOrEmpty(currentFilter))
+            {
+                subjects = subjects.Where(s =>
+                    s.SubjectCode.Contains(currentFilter) ||
+                    s.Description.Contains(currentFilter) ||
+                    s.CourseCode.Contains(currentFilter) ||
+                    s.Category.Contains(currentFilter) ||
+                    s.Offering.Contains(currentFilter)
+                );
+            }
+
+            // Apply sorting
+            subjects = sortOrder switch
+            {
+                "subject_code_desc" => subjects.OrderByDescending(s => s.SubjectCode),
+                "description" => subjects.OrderBy(s => s.Description),
+                "description_desc" => subjects.OrderByDescending(s => s.Description),
+                _ => subjects.OrderBy(s => s.SubjectCode), // Default sort by subject code ascending
+            };
+
+            return View(await subjects.ToListAsync());
         }
 
         // API endpoint for prerequisite validation
@@ -222,5 +261,20 @@ namespace StudentPortal.Controllers
                 return View(viewModel);
             }
         }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(string code)
+        {
+            var subject = await dBContext.Subjects.FindAsync(code);
+
+            if (subject != null)
+            {
+                dBContext.Subjects.Remove(subject);
+                await dBContext.SaveChangesAsync();
+            }
+
+            return RedirectToAction("List", "Subjects");
+        }
+
     }
 }

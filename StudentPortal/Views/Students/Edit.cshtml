@@ -1,12 +1,13 @@
 ﻿@model StudentPortal.Models.AddStudentViewModel
 
 <div class="container py-4" style="max-width: 500px">
-    <h1 class="h3 mb-4">Add Student</h1>
+    <h1 class="h3 mb-4">Edit Student</h1>
     <form method="post">
         <!-- ID -->
+        <input type="hidden" asp-for="StudentId" />
         <div class="mb-3">
             <div class="form-floating">
-                <input type="text" class="form-control" asp-for="StudentId" placeholder="ID" readonly/>
+                <input type="text" class="form-control" asp-for="StudentId" placeholder="ID" readonly disabled />
                 <label asp-for="StudentId">ID</label>
                 <span asp-validation-for="StudentId" class="text-danger"></span>
             </div>
@@ -74,10 +75,17 @@
         </div>
 
         <!-- Submit Button -->
-        <div class="mb-3">
-            <button type="submit" class="btn btn-primary w-100 py-2">Save</button>
+        <div class="row g-3 mb-3">
+            <div class="col">
+                <button type="submit" class="btn btn-outline-primary w-100 py-2">Save</button>
+            </div>
         </div>
+       
     </form>
+        <form asp-action="Delete" asp-controller="Students" method="post">
+            <input type="hidden" name="id" value="@Model.StudentId" />
+            <button type="submit" class="btn btn-outline-danger w-100 py-2" onclick="return confirm('Are you sure you want to delete this student?');">Delete</button>
+        </form>
 </div>
 
 <style>

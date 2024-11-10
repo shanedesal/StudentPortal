@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StudentPortal.Data;
 using StudentPortal.Models;
@@ -6,6 +7,7 @@ using StudentPortal.Models.Entities;
 
 namespace StudentPortal.Controllers
 {
+    [Authorize]
     public class StudentsController : Controller
     {
         private readonly ApplicationDBContext dBContext;
@@ -24,10 +26,18 @@ namespace StudentPortal.Controllers
         [HttpPost]
         public async Task<IActionResult> Add(AddStudentViewModel viewModel)
         {
-            // Check if the model state is valid
+            // First check if the ID already exists
+            var existingStudent = await dBContext.Students.FirstOrDefaultAsync(s => s.Id == viewModel.StudentId);
+            if (existingStudent != null)
+            {
+                ModelState.AddModelError("StudentId", "This Student ID already exists. Please use a different ID.");
+                return View(viewModel);
+            }
+
+            // Then check other validations
             if (!ModelState.IsValid)
             {
-                return View(viewModel); // Return the view with the validation errors
+                return View(viewModel);
             }
 
             var student = new Student
@@ -41,30 +51,28 @@ namespace StudentPortal.Controllers
                 Remarks = viewModel.Remarks
             };
 
-            await dBContext.Students.AddAsync(student);
-            await dBContext.SaveChangesAsync();
-
-            return RedirectToAction("List", "Students");
+            try
+            {
+                await dBContext.Students.AddAsync(student);
+                await dBContext.SaveChangesAsync();
+                return RedirectToAction("List", "Students");
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("StudentId", "An error occurred while saving. The Student ID may be duplicate.");
+                return View(viewModel);
+            }
         }
 
         [HttpGet]
-        public async Task<IActionResult> List()
-        {
-            var students = await dBContext.Students.ToListAsync();
-            return View(students);
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> Edit(long id) // Change Guid to long
+        public async Task<IActionResult> Edit(long id)
         {
             var student = await dBContext.Students.FindAsync(id);
-
             if (student == null)
             {
-                return NotFound(); // Handle student not found
+                return NotFound();
             }
 
-            // Return the student as a view model
             var viewModel = new AddStudentViewModel
             {
                 StudentId = student.Id,
@@ -80,41 +88,90 @@ namespace StudentPortal.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(AddStudentViewModel viewModel) // Use the view model here
+        public async Task<IActionResult> Edit(AddStudentViewModel viewModel)
         {
             if (!ModelState.IsValid)
             {
-                return View(viewModel); // Return the view with validation errors
+                return View(viewModel);
             }
 
-            var student = await dBContext.Students.FindAsync(viewModel.StudentId); // Use StudentId
-
-            if (student != null)
+            try
             {
-                student.FirstName = viewModel.FirstName;
-                student.MiddleName = viewModel.MiddleName;
-                student.LastName = viewModel.LastName;
-                student.Course = viewModel.Course;
-                student.Year = viewModel.Year;
-                student.Remarks = viewModel.Remarks;
-                await dBContext.SaveChangesAsync();
-            }
+                // Remove the existing student
+                var existingStudent = await dBContext.Students.FindAsync(viewModel.StudentId);
+                if (existingStudent != null)
+                {
+                    // Update the existing student's properties
+                    existingStudent.FirstName = viewModel.FirstName;
+                    existingStudent.MiddleName = viewModel.MiddleName;
+                    existingStudent.LastName = viewModel.LastName;
+                    existingStudent.Course = viewModel.Course;
+                    existingStudent.Year = viewModel.Year;
+                    existingStudent.Remarks = viewModel.Remarks;
 
-            return RedirectToAction("List", "Students");
+                    await dBContext.SaveChangesAsync();
+                    return RedirectToAction("List", "Students");
+                }
+
+                return NotFound();
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("", "An error occurred while updating the student.");
+                return View(viewModel);
+            }
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Delete(long id) // Change parameter type to long
+        [HttpGet]
+        public async Task<IActionResult> List(string sortOrder, string currentFilter, string searchString)
         {
-            var student = await dBContext.Students.FindAsync(id); // Use FindAsync to get student by ID
+            // Sort parameters
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["IdSortParm"] = String.IsNullOrEmpty(sortOrder) ? "id_desc" : "";
+            ViewData["FirstNameSortParm"] = sortOrder == "firstName" ? "firstName_desc" : "firstName";
+            ViewData["LastNameSortParm"] = sortOrder == "lastName" ? "lastName_desc" : "lastName";
+            ViewData["CourseSortParm"] = sortOrder == "course" ? "course_desc" : "course";
+            ViewData["YearSortParm"] = sortOrder == "year" ? "year_desc" : "year";
 
-            if (student != null)
+            // Handle search
+            if (searchString != null)
             {
-                dBContext.Students.Remove(student); // Remove the student entity
-                await dBContext.SaveChangesAsync();
+                currentFilter = searchString;
             }
 
-            return RedirectToAction("List", "Students");
+            ViewData["CurrentFilter"] = currentFilter;
+
+            var students = dBContext.Students.AsQueryable();
+
+            // Apply search if provided
+            if (!String.IsNullOrEmpty(currentFilter))
+            {
+                students = students.Where(s =>
+                    s.Id.ToString().Contains(currentFilter) ||
+                    s.FirstName.Contains(currentFilter) ||
+                    s.MiddleName.Contains(currentFilter) ||
+                    s.LastName.Contains(currentFilter) ||
+                    s.Course.Contains(currentFilter) ||
+                    s.Year.ToString().Contains(currentFilter)
+                );
+            }
+
+            // Apply sorting
+            students = sortOrder switch
+            {
+                "id_desc" => students.OrderByDescending(s => s.Id),
+                "firstName" => students.OrderBy(s => s.FirstName),
+                "firstName_desc" => students.OrderByDescending(s => s.FirstName),
+                "lastName" => students.OrderBy(s => s.LastName),
+                "lastName_desc" => students.OrderByDescending(s => s.LastName),
+                "course" => students.OrderBy(s => s.Course),
+                "course_desc" => students.OrderByDescending(s => s.Course),
+                "year" => students.OrderBy(s => s.Year),
+                "year_desc" => students.OrderByDescending(s => s.Year),
+                _ => students.OrderBy(s => s.Id),
+            };
+
+            return View(await students.ToListAsync());
         }
     }
 }

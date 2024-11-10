@@ -1,17 +1,16 @@
-﻿@model List<StudentPortal.Models.Entities.Subject>
+﻿@model List<StudentPortal.Models.Entities.SubjectSchedule>
 
 <div class="container-fluid px-4">
-    <h1 class="mt-4 mb-4">Subjects</h1>
+    <h1 class="mt-4 mb-4">Subject Schedules</h1>
 
     <div class="row mb-3 align-items-center">
         <div class="col-md-3">
-            <a asp-controller="Subjects" asp-action="Add" class="btn btn-dark me-2">Add Subject</a>
             <a asp-controller="SubjectSchedules" asp-action="Add" class="btn btn-dark">Add Schedule</a>
         </div>
         <div class="col-md-4 ms-auto">
             <form asp-action="List" method="get" class="d-flex">
                 <div class="input-group">
-                    <input type="text" name="searchString" class="form-control" placeholder="Search by subject code, description..."
+                    <input type="text" name="searchString" class="form-control" placeholder="Search by EDP code, subject, section..."
                            value="@ViewData["CurrentFilter"]" />
                     <button type="submit" class="btn btn-dark">Search</button>
                     @if (!string.IsNullOrEmpty((string)ViewData["CurrentFilter"]))
@@ -35,38 +34,44 @@
             <thead class="table-dark">
                 <tr>
                     <th>
+                        <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["EDPCodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                            EDP Code <i class="bi bi-arrow-down-up"></i>
+                        </a>
+                    </th>
+                    <th>
                         <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["SubjectCodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
                             Subject Code <i class="bi bi-arrow-down-up"></i>
                         </a>
                     </th>
-                    <th>
-                        <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["DescriptionSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
-                            Description <i class="bi bi-arrow-down-up"></i>
-                        </a>
-                    </th>
-                    <th>Units</th>
-                    <th>Offering</th>
-                    <th>Category</th>
-                    <th>Course Code</th>
-                    <th>Curriculum Year</th>
-                    <th>Pre-requisite</th>
+                    <th>Start Time</th>
+                    <th>End Time</th>
+                    <th>Days</th>
+                    <th>Room</th>
+                    <th>Max Size</th>
+                    <th>Class Size</th>
+                    <th>Status</th>
+                    <th>Section</th>
+                    <th>School Year</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                @foreach (var subject in Model)
+                @foreach (var schedule in Model)
                 {
                     <tr>
-                        <td>@subject.SubjectCode</td>
-                        <td>@subject.Description</td>
-                        <td>@subject.Units</td>
-                        <td>@subject.Offering</td>
-                        <td>@subject.Category</td>
-                        <td>@subject.CourseCode</td>
-                        <td>@subject.CurriculumYear</td>
-                        <td>@subject.PreRequisiteCode</td>
+                        <td>@schedule.EDPCode</td>
+                        <td>@schedule.SubjectCode</td>
+                        <td>@schedule.StartTime.ToString("hh:mm tt")</td>
+                        <td>@schedule.EndTime.ToString("hh:mm tt")</td>
+                        <td>@schedule.Days</td>
+                        <td>@schedule.Room</td>
+                        <td>@schedule.MaxSize</td>
+                        <td>@schedule.ClassSize</td>
+                        <td>@schedule.Status</td>
+                        <td>@schedule.Section</td>
+                        <td>@schedule.SchoolYear</td>
                         <td>
-                            <a class="btn btn-outline-dark btn-sm" asp-controller="Subjects" asp-action="Edit" asp-route-id="@subject.SubjectCode">
+                            <a class="btn btn-outline-dark btn-sm" asp-controller="SubjectSchedules" asp-action="Edit" asp-route-id="@schedule.EDPCode">
                                 <i class="bi bi-pencil"></i> Edit
                             </a>
                         </td>
@@ -91,22 +96,10 @@
         .table td {
             vertical-align: middle;
             padding: 0.5rem;
-            max-width: 200px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
         }
 
         .table th {
             padding: 0.75rem 0.5rem;
-        }
-
-        .table td:hover {
-            white-space: normal;
-            overflow: visible;
-            position: relative;
-            background-color: #f8f9fa;
-            z-index: 1;
         }
 
     .input-group {

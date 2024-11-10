@@ -1,0 +1,268 @@
+﻿@model StudentPortal.Models.EnrollmentViewModel
+
+<div class="container mt-4">
+    <div class="card">
+        <div class="card-header">
+            <h4>Student Enrollment Entry</h4>
+        </div>
+        <div class="card-body">
+            <form id="enrollmentForm">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="studentId">ID Number</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="studentId" name="studentId" required>
+                                <button type="button" class="btn btn-primary" id="verifyStudent">Verify</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label for="studentName">Name</label>
+                            <input type="text" class="form-control" id="studentName" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="course">Course</label>
+                            <input type="text" class="form-control" id="course" readonly>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label for="year">Year</label>
+                            <input type="text" class="form-control" id="year" readonly>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+        <div class="col-md-3">
+            <div class="form-group">
+                <label for="edpCode">EDP Code/Subject Search</label>
+                <input type="text" class="form-control" id="edpCode" name="edpCode">
+            </div>
+        </div>
+    </div>
+
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>EDP Code</th>
+                                <th>Subject Code</th>
+                                <th>Start Time</th>
+                                <th>End Time</th>
+                                <th>Days</th>
+                                <th>Units</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="availableSchedules">
+                            @foreach (var schedule in Model.AvailableSchedules)
+                            {
+                                <tr>
+                                    <td>@schedule.EDPCode</td>
+                                    <td>@schedule.SubjectCode</td>
+                                    <td>@schedule.StartTime.ToString("hh:mm tt")</td>
+                                    <td>@schedule.EndTime.ToString("hh:mm tt")</td>
+                                    <td>@schedule.Days</td>
+                                    <td>@schedule.Subject.Units</td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-primary select-subject"
+                                                data-edp="@schedule.EDPCode">
+                                            Select
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                </table>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <h5>Selected Subjects</h5>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>EDP Code</th>
+                                <th>Subject Code</th>
+                                <th>Schedule</th>
+                                <th>Units</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="selectedSubjects"></tbody>
+                        <tfoot>
+                            <tr>
+                                <td colspan="3" class="text-end"><strong>Total Units:</strong></td>
+                                <td id="totalUnits">0</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            let isStudentVerified = false;
+
+            // Verify student
+            $("#verifyStudent").click(function() {
+                const studentId = $("#studentId").val();
+                if (!studentId) {
+                    alert("Please enter a student ID");
+                    return;
+                }
+
+                $.post("/Enrollment/VerifyStudent", { studentId: studentId })
+                    .done(function(response) {
+                        if (response.success) {
+                            isStudentVerified = true;
+                            $("#studentName").val(response.student.name);
+                            $("#course").val(response.student.course);
+                            $("#year").val(response.student.year);
+                            
+                            // Load existing enrolled subjects if any
+                            loadEnrolledSubjects(studentId);
+                        } else {
+                            isStudentVerified = false;
+                            alert(response.message);
+                        }
+                    });
+            });
+
+            // Search functionality
+            $("#edpCode").on("input", function() {
+                const searchTerm = $(this).val().toLowerCase();
+                
+                $("#availableSchedules tr").each(function() {
+                    const edpCode = $(this).find("td:first").text().toLowerCase();
+                    const subjectCode = $(this).find("td:eq(1)").text().toLowerCase();
+                    
+                    if (edpCode.includes(searchTerm) || subjectCode.includes(searchTerm)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+                // Select subject
+                $(document).on("click", ".select-subject", function () {
+                    if (!isStudentVerified) {
+                        alert("Please verify student first");
+                        return;
+                    }
+
+                    const studentId = $("#studentId").val();
+                    const edpCode = $(this).data("edp");
+
+                    console.log("Attempting to add subject:", { studentId, edpCode });  // Debug log
+
+                    $.post("/Enrollment/AddSubject", {
+                        studentId: studentId,
+                        edpCode: edpCode
+                    })
+                        .done(function (response) {
+                            console.log("Server response:", response);  // Debug log
+                            if (response.success) {
+                                const newRow = `
+                            <tr>
+                                <td>${response.subject.edpCode}</td>
+                                <td>${response.subject.subjectCode}</td>
+                                <td>${response.subject.days} ${response.subject.startTime}-${response.subject.endTime}</td>
+                                <td>${response.subject.units}</td>
+                                <td>
+                                    <button type="button" class="btn btn-sm btn-danger remove-subject"
+                                            data-edp="${response.subject.edpCode}">
+                                        Remove
+                                    </button>
+                                </td>
+                            </tr>
+                        `;
+                                $("#selectedSubjects").append(newRow);
+                                updateTotalUnits(response.totalUnits);
+                            } else {
+                                console.error("Error response:", response.message);  // Debug log
+                                alert(response.message);
+                            }
+                        })
+                        .fail(function (xhr, status, error) {
+                            console.error("AJAX error details:", {
+                                status: status,
+                                error: error,
+                                responseText: xhr.responseText
+                            });
+                            alert("Error adding subject. Check browser console for details.");
+                        });
+                });
+
+            // Remove subject
+            $(document).on("click", ".remove-subject", function() {
+                const studentId = $("#studentId").val();
+                const edpCode = $(this).data("edp");
+                const row = $(this).closest("tr");
+                
+                $.post("/Enrollment/RemoveSubject", {
+                    studentId: studentId,
+                    edpCode: edpCode
+                })
+                .done(function(response) {
+                    if (response.success) {
+                        row.remove();
+                        updateTotalUnits(response.totalUnits);
+                    } else {
+                        alert(response.message);
+                    }
+                });
+            });
+
+            // Helper function to update total units
+            function updateTotalUnits(total) {
+                $("#totalUnits").text(total);
+            }
+
+            // Load enrolled subjects
+            function loadEnrolledSubjects(studentId) {
+                $.get("/Enrollment/GetEnrolledSubjects", { studentId: studentId })
+                    .done(function(response) {
+                        if (response.success) {
+                            $("#selectedSubjects").empty();
+                            response.subjects.forEach(function(subject) {
+                                const row = `
+                                    <tr>
+                                        <td>${subject.edpCode}</td>
+                                        <td>${subject.subjectCode}</td>
+                                        <td>${subject.days} ${subject.startTime}-${subject.endTime}</td>
+                                        <td>${subject.units}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-danger remove-subject"
+                                                    data-edp="${subject.edpCode}">
+                                                Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                                $("#selectedSubjects").append(row);
+                            });
+                            updateTotalUnits(response.totalUnits);
+                        }
+                    });
+            }
+        });
+    </script>
+}

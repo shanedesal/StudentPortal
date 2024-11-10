@@ -1,0 +1,273 @@
+﻿@model StudentPortal.Models.AddSubjectScheduleViewModel
+
+<div class="container py-4" style="max-width: 800px">
+    <h1 class="h3 mb-4">Add Schedule</h1>
+    <form method="post">
+        <!-- EDP Code Section -->
+        <div class="mb-4">
+            <div class="form-floating">
+                <input type="text" class="form-control" asp-for="EDPCode" placeholder="EDP Code" required />
+                <label asp-for="EDPCode">EDP Code</label>
+                <span asp-validation-for="EDPCode" class="text-danger"></span>
+            </div>
+        </div>
+
+        <!-- Subject Code Section -->
+        <div class="mb-4">
+            <div class="form-floating">
+                <input type="text" class="form-control" asp-for="SubjectCode" placeholder="Subject Code" required />
+                <label asp-for="SubjectCode">Subject Code</label>
+                <span asp-validation-for="SubjectCode" class="text-danger"></span>
+            </div>
+            <!-- Keep existing subject results div -->
+            <div id="subjectResults" class="mt-2 border rounded-3 overflow-hidden"
+                 style="display: none; max-height: 300px; overflow-y: auto;">
+                <!-- Existing table content -->
+            </div>
+        </div>
+
+        <!-- Time Section -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="time" class="form-control" asp-for="StartTime" placeholder="Start Time" required />
+                    <label asp-for="StartTime">Start Time</label>
+                    <span asp-validation-for="StartTime" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-floating">
+                    <input type="time" class="form-control" asp-for="EndTime" placeholder="End Time" required />
+                    <label asp-for="EndTime">End Time</label>
+                    <span asp-validation-for="EndTime" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Days Section -->
+        <div class="mb-4">
+            <div class="form-floating">
+                <input type="text" class="form-control" asp-for="Days" id="Days"
+                       placeholder="Days" maxlength="4" required />
+                <label asp-for="Days">Days</label>
+                <span asp-validation-for="Days" class="text-danger"></span>
+            </div>
+            <div id="daysHelp" class="form-text">
+                Common patterns: MWF (Mon/Wed/Fri), TTH (Tue/Thu), TTHS (Tue/Thu/Sat), or single days (MON,TUE,WED,THU,FRI,SAT)
+            </div>
+        </div>
+
+        <!-- Room and Size Section -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <input type="text" class="form-control" asp-for="Room" placeholder="Room" maxlength="3" required />
+                    <label asp-for="Room">Room</label>
+                    <span asp-validation-for="Room" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <input type="number" class="form-control" asp-for="MaxSize" placeholder="Maximum Size" min="1" max="100" required />
+                    <label asp-for="MaxSize">Maximum Size</label>
+                    <span asp-validation-for="MaxSize" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <input type="number" class="form-control" asp-for="ClassSize" placeholder="Class Size" min="0" max="100" />
+                    <label asp-for="ClassSize">Class Size</label>
+                    <span asp-validation-for="ClassSize" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status, Section, and School Year -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <select class="form-select h-100" asp-for="Status">
+                        <option value="">-- Select --</option>
+                        <option value="ACT">Active</option>
+                        <option value="INA">Inactive</option>
+                        <option value="DIS">Dissolved</option>
+                        <option value="RES">Restricted</option>
+                        <option value="CLO">Closed</option>
+                    </select>
+                    <label asp-for="Status">Status</label>
+                    <span asp-validation-for="Status" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <input type="text" class="form-control" asp-for="Section" placeholder="Section" maxlength="3" required />
+                    <label asp-for="Section">Section</label>
+                    <span asp-validation-for="Section" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-floating">
+                    <select class="form-select h-100" asp-for="SchoolYear">
+                        <option value="">-- Select --</option>
+                        <option value="1">1st Year</option>
+                        <option value="2">2nd Year</option>
+                        <option value="3">3rd Year</option>
+                        <option value="4">4th Year</option>
+                    </select>
+                    <label asp-for="SchoolYear">School Year</label>
+                    <span asp-validation-for="SchoolYear" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="row g-3">
+            <div class="col-md-6">
+                <button type="submit" class="btn btn-outline-primary w-100 py-2">Save</button>
+            </div>
+            <div class="col-md-6">
+                <a asp-action="List" asp-controller="Subjects" class="btn btn-outline-secondary w-100 py-2">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>
+
+<style>
+    .form-floating > .form-select {
+        padding-top: 1.625rem;
+        padding-bottom: 0.625rem;
+    }
+
+    .form-floating > label {
+        padding: 1rem 0.75rem;
+    }
+
+    .form-select {
+        height: calc(3.5rem + 2px);
+    }
+
+    .btn {
+        height: 48px;
+    }
+</style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        let searchTimeout;
+
+        document.getElementById('SubjectCode').addEventListener('input', function (e) {
+            clearTimeout(searchTimeout);
+            const searchValue = e.target.value.trim();
+            const resultsDiv = document.getElementById('subjectResults');
+
+            if (searchValue.length < 2) {
+                resultsDiv.style.display = 'none';
+                return;
+            }
+
+            searchTimeout = setTimeout(() => {
+                // Update the URL to match your controller route
+                fetch(`/SubjectSchedules/SearchSubjects?term=${encodeURIComponent(searchValue)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const tbody = document.querySelector('#subjectsTable tbody');
+                        tbody.innerHTML = '';
+
+                        data.forEach(subject => {
+                            const row = `
+                                    <tr class="subject-row">
+                                        <td class="subject-code">${subject.subjectCode}</td>
+                                        <td>${subject.description}</td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-outline-primary"
+                                                    onclick="selectSubject('${subject.subjectCode}')">
+                                                Select
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            tbody.innerHTML += row;
+                        });
+
+                        resultsDiv.style.display = data.length > 0 ? 'block' : 'none';
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        // Add error handling UI feedback here if needed
+                    });
+            }, 300);
+        });
+
+        function selectSubject(subjectCode) {
+            document.getElementById('SubjectCode').value = subjectCode;
+            document.getElementById('subjectResults').style.display = 'none';
+        }
+
+        // Close results when clicking outside
+        document.addEventListener('click', function (e) {
+            const resultsDiv = document.getElementById('subjectResults');
+            const subjectInput = document.getElementById('SubjectCode');
+
+            if (!resultsDiv.contains(e.target) && e.target !== subjectInput) {
+                resultsDiv.style.display = 'none';
+            }
+        });
+        $.validator.addMethod("edpCodeAvailable", function (value, element) {
+            let isAvailable = false;
+            $.ajax({
+                url: '@Url.Action("CheckEdpCode", "SubjectSchedules")',
+                data: { edpCode: value },
+                async: false,
+                success: function (result) {
+                    isAvailable = result;
+                }
+            });
+            return isAvailable;
+        }, "This EDP Code is already in use.");
+
+        // Add validation rules
+        $("#edpCodeInput").rules("add", {
+            edpCodeAvailable: true
+        });
+
+        $(document).ready(function () {
+            const validPatterns = [
+                'MWF', 'TTH', 'TTHS',
+                'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'
+            ];
+
+            // Convert input to uppercase and validate schedule pattern
+            $('#Days').on('input', function () {
+                this.value = this.value.toUpperCase();
+
+                // Show suggestions if input starts matching a pattern
+                const currentValue = this.value;
+                if (currentValue.length > 0) {
+                    const matches = validPatterns.filter(pattern =>
+                        pattern.startsWith(currentValue));
+
+                    if (matches.length > 0) {
+                        $('#daysHelp').html('Matching patterns: ' + matches.join(', '));
+                    } else {
+                        $('#daysHelp').html('No matching schedule patterns found. Valid patterns: MWF, TTH, TTHS, or single days (MON,TUE,WED,THU,FRI,SAT)');
+                    }
+                } else {
+                    $('#daysHelp').html('Common patterns: MWF (Mon/Wed/Fri), TTH (Tue/Thu), TTHS (Tue/Thu/Sat), or single days (MON,TUE,WED,THU,FRI,SAT)');
+                }
+            });
+
+            // Add custom validation method
+            $.validator.addMethod('validSchedulePattern', function (value, element) {
+                return validPatterns.includes(value.toUpperCase());
+            }, 'Please enter a valid schedule pattern (MWF, TTH, TTHS, or single days MON,TUE,WED,THU,FRI,SAT)');
+
+            // Add validation rules
+            $('#Days').rules('add', {
+                validSchedulePattern: true
+            });
+        });
+    </script>
+}

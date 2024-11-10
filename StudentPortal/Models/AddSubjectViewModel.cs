@@ -7,12 +7,15 @@ namespace StudentPortal.Models
     {
         [Required(ErrorMessage = "Subject Code is required")]
         [Display(Name = "Subject Code")]
+        [StringLength(15, ErrorMessage = "Subject Code cannot be longer than 15 characters.")]
         public string SubjectCode { get; set; }
 
         [Required(ErrorMessage = "Description is required")]
+        [StringLength(50, ErrorMessage = "Subject Description cannot be longer than 50 characters.")]
         public string Description { get; set; }
 
         [Required(ErrorMessage = "Units is required")]
+        [Range(1, 4, ErrorMessage = "Units must be 1, 2, 3 or 4")]
         public int Units { get; set; }
 
         [Required(ErrorMessage = "Offering is required")]
@@ -30,6 +33,7 @@ namespace StudentPortal.Models
         public string CurriculumYear { get; set; }
 
         [Display(Name = "Pre-Requisite")]
+        [StringLength(15, ErrorMessage = "Requisite Code cannot be longer than 15 characters.")]
         public string? PreRequisiteCode { get; set; }
 
         public IEnumerable<Subject>? SubjectsTable { get; set; }
