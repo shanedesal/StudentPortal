@@ -5,17 +5,17 @@
 
     <div class="row mb-3 align-items-center">
         <div class="col-md-3">
-            <a asp-controller="Students" asp-action="Add" class="btn btn-dark">Add Student</a>
+            <a href="#" class="btn btn-dark" id="addStudentBtn">Add Student</a>
         </div>
         <div class="col-md-4 ms-auto">
-            <form asp-action="List" method="get" class="d-flex">
+            <form asp-action="List" method="get" class="d-flex" id="searchForm">
                 <div class="input-group">
-                    <input type="text" name="searchString" class="form-control" placeholder="Search by ID, name, course..."
+                    <input type="text" name="searchString" id="searchInput" class="form-control" placeholder="Search by ID, name, course..."
                            value="@ViewData["CurrentFilter"]" />
-                    <button type="submit" class="btn btn-dark">Search</button>
+                    <button type="submit" class="btn btn-dark" id="searchButton">Search</button>
                     @if (!string.IsNullOrEmpty((string)ViewData["CurrentFilter"]))
                     {
-                        <a asp-action="List" class="btn btn-outline-dark">Clear</a>
+                        <a asp-action="List" class="btn btn-outline-dark" id="clearSearchBtn">Clear</a>
                     }
                 </div>
             </form>
@@ -24,38 +24,38 @@
 
     @if (TempData["InfoMessage"] != null)
     {
-        <div class="alert alert-info">
+        <div class="alert alert-info" id="infoMessage">
             @TempData["InfoMessage"]
         </div>
     }
 
     <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-hover" id="studentsTable">
             <thead class="table-dark">
                 <tr>
                     <th>
-                        <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["IdSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <a class="text-white text-decoration-none" id="sortById" asp-action="List" asp-route-sortOrder="@ViewData["IdSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
                             ID <i class="bi bi-arrow-down-up"></i>
                         </a>
                     </th>
                     <th>
-                        <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["FirstNameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <a class="text-white text-decoration-none" id="sortByFirstName" asp-action="List" asp-route-sortOrder="@ViewData["FirstNameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
                             First Name <i class="bi bi-arrow-down-up"></i>
                         </a>
                     </th>
                     <th>Middle Name</th>
                     <th>
-                        <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["LastNameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <a class="text-white text-decoration-none" id="sortByLastName" asp-action="List" asp-route-sortOrder="@ViewData["LastNameSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
                             Last Name <i class="bi bi-arrow-down-up"></i>
                         </a>
                     </th>
                     <th>
-                        <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["CourseSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <a class="text-white text-decoration-none" id="sortByCourse" asp-action="List" asp-route-sortOrder="@ViewData["CourseSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
                             Course <i class="bi bi-arrow-down-up"></i>
                         </a>
                     </th>
                     <th>
-                        <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["YearSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <a class="text-white text-decoration-none" id="sortByYear" asp-action="List" asp-route-sortOrder="@ViewData["YearSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
                             Year <i class="bi bi-arrow-down-up"></i>
                         </a>
                     </th>
@@ -65,7 +65,7 @@
             <tbody>
                 @foreach (var student in Model)
                 {
-                    <tr>
+                    <tr id="student-@student.Id">
                         <td>@student.Id</td>
                         <td>@student.FirstName</td>
                         <td>@student.MiddleName</td>
@@ -73,14 +73,56 @@
                         <td>@student.Course</td>
                         <td>@student.Year</td>
                         <td>
-                            <a class="btn btn-outline-dark btn-sm" asp-controller="Students" asp-action="Edit" asp-route-id="@student.Id">
-                                <i class="bi bi-pencil"></i> Edit
-                            </a>
+                            <div class="d-flex">
+                                <a class="btn btn-outline-dark btn-sm edit-button mr-2" id="editBtn-@student.Id" data-student-id="@student.Id">
+                                    <i class="bi bi-pencil"></i> Edit
+                                </a>
+                                <form asp-action="Delete" asp-controller="Students" method="post" id="deleteForm-@student.Id">
+                                    <input type="hidden" name="id" value="@student.Id" />
+                                    <button type="submit" class="btn btn-outline-danger" id="deleteBtn-@student.Id" onclick="return confirm('Are you sure you want to remove @student.FirstName @student.LastName?');">Delete</button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                 }
             </tbody>
         </table>
+        <!-- Edit Modal -->
+        <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="editModalLabel">Edit Student</h5>
+                        <button type="button" class="btn-close" id="editModalClose" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body" id="editModalBody">
+                        @await Html.PartialAsync("_EditStudent", new AddStudentViewModel())
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" id="editModalCloseBtn" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-primary" id="saveChangesButton">Save Changes</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Add Modal -->
+<div class="modal fade" id="addModal" tabindex="-1" aria-labelledby="addModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addModalLabel">Add Student</h5>
+                <button type="button" class="btn-close" id="addModalClose" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="addModalBody">
+                <!-- Will be populated via AJAX -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" id="addModalCloseBtn" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveNewStudentButton">Save</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -134,3 +176,89 @@
         padding-bottom: 2rem;
     }
 </style>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            // Show the modal when the "Edit" button is clicked
+
+        });
+        $(document).ready(function () {
+            // Existing edit modal code...
+            $(".edit-button").click(function () {
+                var studentId = $(this).data("student-id");
+                $.ajax({
+                    url: "@Url.Action("GetEditView", "Students")",
+                    data: { id: studentId },
+                    type: "GET",
+                    success: function (partialView) {
+                        $("#editModalBody").html(partialView);
+                        $("#editModal").modal("show");
+                    }
+                });
+            });
+
+            // Handle the "Save Changes" button click
+            $("#saveChangesButton").click(function () {
+                var form = $("#editModal .modal-body form");
+                var formData = form.serialize();
+
+                $.ajax({
+                    url: "@Url.Action("Edit", "Students")",
+                    type: "POST",
+                    data: formData,
+                    success: function (response) {
+                        if (response.success) {
+                            $("#editModal").modal("hide");
+                            // Refresh the page to show updated data
+                            window.location.reload();
+                        } else {
+                            // Handle validation errors
+                            alert("Error: " + response.errors.join("\n"));
+                        }
+                    },
+                    error: function () {
+                        alert("An error occurred while saving changes.");
+                    }
+                });
+            });
+            // Handle Add Student button click
+            $("#addStudentBtn").click(function () {
+                $.ajax({
+                    url: "@Url.Action("GetAddView", "Students")",
+                    type: "GET",
+                    success: function (partialView) {
+                        $("#addModalBody").html(partialView);
+                        $("#addModal").modal("show");
+                    }
+                });
+            });
+
+            // Handle Save New Student button click
+            $("#saveNewStudentButton").click(function () {
+                var form = $("#addModal .modal-body form");
+                $.ajax({
+                    url: "@Url.Action("Add", "Students")",
+                    type: "POST",
+                    data: form.serialize(),
+                    success: function (response) {
+                        if (response.success) {
+                            $("#addModal").modal("hide");
+                            // Refresh the page to show the new student
+                            window.location.reload();
+                        } else {
+                            // Update the form with validation errors
+                            $("#addModalBody").html(response);
+                        }
+                    },
+                    error: function () {
+                        alert("An error occurred while saving the student.");
+                    }
+                });
+            });
+        });
+    </script>
+}

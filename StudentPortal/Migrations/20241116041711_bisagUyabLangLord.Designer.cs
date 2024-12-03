@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudentPortal.Data;
 
@@ -11,9 +12,11 @@ using StudentPortal.Data;
 namespace StudentPortal.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241116041711_bisagUyabLangLord")]
+    partial class bisagUyabLangLord
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -496,7 +499,7 @@ namespace StudentPortal.Migrations
                     b.HasOne("StudentPortal.Models.Entities.SubjectSchedule", "SubjectSchedule")
                         .WithMany("EnrollmentDetails")
                         .HasForeignKey("EdpCode")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("StudentPortal.Models.Entities.EnrollmentHeader", "EnrollmentHeader")
@@ -531,7 +534,7 @@ namespace StudentPortal.Migrations
                     b.HasOne("StudentPortal.Models.Entities.Student", "Student")
                         .WithMany("EnrollmentHeaders")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("StudentPortal.Models.Entities.Student", null)

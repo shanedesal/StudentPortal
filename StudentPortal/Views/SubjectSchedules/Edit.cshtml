@@ -2,14 +2,14 @@
 
 <div class="container py-4" style="max-width: 800px">
     <h1 class="h3 mb-4">Edit Subject Schedule</h1>
-    <form method="post" asp-action="Edit" asp-controller="SubjectSchedules">
+    <form method="post" asp-action="Edit" asp-controller="SubjectSchedules" id="scheduleForm">
         <!-- Hidden field for EDP Code since it shouldn't be editable -->
-        <input type="hidden" asp-for="EDPCode" />
+        <input type="hidden" asp-for="EDPCode" id="HiddenEDPCode" />
 
         <!-- Display EDP Code as read-only -->
         <div class="mb-3">
             <div class="form-floating">
-                <input type="text" class="form-control" value="@Model.EDPCode" disabled />
+                <input type="text" class="form-control" value="@Model.EDPCode" disabled id="DisplayEDPCode" />
                 <label>EDP Code</label>
             </div>
         </div>
@@ -17,14 +17,27 @@
         <!-- Subject Code Section with Search -->
         <div class="mb-4">
             <div class="form-floating">
-                <input type="text" class="form-control" asp-for="SubjectCode" placeholder="Subject Code" required />
+                <input type="text" class="form-control" asp-for="SubjectCode" id="SubjectCode" placeholder="Subject Code" required />
                 <label asp-for="SubjectCode">Subject Code</label>
                 <span asp-validation-for="SubjectCode" class="text-danger"></span>
             </div>
             <!-- Keep existing subject results div -->
             <div id="subjectResults" class="mt-2 border rounded-3 overflow-hidden"
                  style="display: none; max-height: 300px; overflow-y: auto;">
-                <!-- Existing table content -->
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0" id="subjectsTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th class="px-3" style="width: 25%">Code</th>
+                                <th class="px-3" style="width: 55%">Description</th>
+                                <th class="px-3" style="width: 20%">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subjectsTableBody">
+                            <!-- Results will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -32,17 +45,20 @@
         <div class="row g-3 mb-4">
             <div class="col-md-6">
                 <div class="form-floating">
-                    <input type="time" class="form-control" asp-for="StartTime" placeholder="Start Time" required />
+                    <input type="time" class="form-control" asp-for="StartTime" id="StartTime" placeholder="Start Time" required />
                     <label asp-for="StartTime">Start Time</label>
                     <span asp-validation-for="StartTime" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="form-floating">
-                    <input type="time" class="form-control" asp-for="EndTime" placeholder="End Time" required />
+                    <input type="time" class="form-control" asp-for="EndTime" id="EndTime" placeholder="End Time" required />
                     <label asp-for="EndTime">End Time</label>
                     <span asp-validation-for="EndTime" class="text-danger"></span>
                 </div>
+            </div>
+            <div class="col-12">
+                <div id="timeValidationError" class="text-danger"></div>
             </div>
         </div>
 
@@ -63,21 +79,21 @@
         <div class="row g-3 mb-4">
             <div class="col-md-4">
                 <div class="form-floating">
-                    <input type="text" class="form-control" asp-for="Room" placeholder="Room" maxlength="3" required />
+                    <input type="text" class="form-control" asp-for="Room" id="RoomInput" placeholder="Room" maxlength="3" required />
                     <label asp-for="Room">Room</label>
                     <span asp-validation-for="Room" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-floating">
-                    <input type="number" class="form-control" asp-for="MaxSize" placeholder="Maximum Size" min="1" max="100" required />
+                    <input type="number" class="form-control" asp-for="MaxSize" id="MaxSizeInput" placeholder="Maximum Size" min="1" max="100" required />
                     <label asp-for="MaxSize">Maximum Size</label>
                     <span asp-validation-for="MaxSize" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-floating">
-                    <input type="number" class="form-control" asp-for="ClassSize" placeholder="Class Size" min="0" max="100" />
+                    <input type="number" class="form-control" asp-for="ClassSize" id="ClassSizeInput" placeholder="Class Size" min="0" max="100" readonly />
                     <label asp-for="ClassSize">Class Size</label>
                     <span asp-validation-for="ClassSize" class="text-danger"></span>
                 </div>
@@ -88,7 +104,7 @@
         <div class="row g-3 mb-4">
             <div class="col-md-4">
                 <div class="form-floating">
-                    <select class="form-select h-100" asp-for="Status">
+                    <select class="form-select h-100" asp-for="Status" id="StatusSelect">
                         <option value="">-- Select --</option>
                         <option value="ACT">Active</option>
                         <option value="INA">Inactive</option>
@@ -102,14 +118,14 @@
             </div>
             <div class="col-md-4">
                 <div class="form-floating">
-                    <input type="text" class="form-control" asp-for="Section" placeholder="Section" maxlength="3" required />
+                    <input type="text" class="form-control" asp-for="Section" id="SectionInput" placeholder="Section" maxlength="3" required />
                     <label asp-for="Section">Section</label>
                     <span asp-validation-for="Section" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-floating">
-                    <select class="form-select h-100" asp-for="SchoolYear">
+                    <select class="form-select h-100" asp-for="SchoolYear" id="SchoolYearSelect">
                         <option value="">-- Select --</option>
                         <option value="1">1st Year</option>
                         <option value="2">2nd Year</option>
@@ -125,10 +141,10 @@
         <!-- Form Buttons -->
         <div class="row g-3">
             <div class="col-md-6">
-                <button type="submit" class="btn btn-outline-primary w-100 py-2">Save Changes</button>
+                <button type="submit" class="btn btn-outline-primary w-100 py-2" id="SaveChangesButton">Save Changes</button>
             </div>
             <div class="col-md-6">
-                <a asp-action="List" class="btn btn-outline-secondary w-100 py-2">Cancel</a>
+                <a asp-action="List" class="btn btn-outline-secondary w-100 py-2" id="CancelButton">Cancel</a>
             </div>
         </div>
     </form>

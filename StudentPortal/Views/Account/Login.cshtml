@@ -14,14 +14,14 @@
 
         <div class="form-group">
             <label asp-for="Email" class="form-label"></label>
-            <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+            <input asp-for="Email" class="form-control" placeholder="Enter your email" id="loginEmail"/>
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
 
         <div class="form-group">
             <label asp-for="Password" class="form-label"></label>
             <div class="input-group">
-                <input asp-for="Password" class="form-control" placeholder="Enter your password" type="password" id="passwordInput" />
+                <input asp-for="Password" class="form-control" placeholder="Enter your password" type="password" id="loginPasswordInput" />
                 <button class="password-toggle" type="button" id="togglePassword">
                     <i class="bi bi-eye-slash" id="toggleIcon"></i>
                 </button>
@@ -31,23 +31,23 @@
 
         <div class="form-links d-flex justify-content-between align-items-center">
             <div class="form-check">
-                <input asp-for="RememberMe" class="form-check-input" />
-                <label asp-for="RememberMe" class="form-check-label">Remember Me?</label>
+                <input asp-for="RememberMe" class="form-check-input" id="loginRememberMeCheckBox"/>
+                <label asp-for="RememberMe" class="form-check-label" id="loginRememberMeLabel">Remember Me?</label>
             </div>
-            <a asp-controller="Account" asp-action="VerifyEmail" class="text-decoration-none">
+            <a asp-controller="Account" asp-action="VerifyEmail" class="text-decoration-none" id="loginForgotPasswordLink">
                 Forgot Password?
             </a>
         </div>
 
         <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">Login</button>
-            <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary">Back</a>
+            <button type="submit" class="btn btn-primary" id="loginLoginButton">Login</button>
+            <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary" id="loginBackButton">Back</a>
         </div>
     </form>
 
     <div class="text-center mt-4">
         <span>Don't have an account? </span>
-        <a asp-action="Register" asp-controller="Account" class="text-decoration-none">Register here</a>
+        <a asp-action="Register" asp-controller="Account" class="text-decoration-none" id="loginRegisterHereLink">Register here</a>
     </div>
 </div>
 
@@ -92,15 +92,15 @@
     }
     <script>
         document.getElementById('togglePassword').addEventListener('click', function () {
-            const passwordInput = document.getElementById('passwordInput');
+            const loginPasswordInput = document.getElementById('loginPasswordInput');
             const toggleIcon = document.getElementById('toggleIcon');
 
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
+            if (loginPasswordInput.type === 'password') {
+                loginPasswordInput.type = 'text';
                 toggleIcon.classList.remove('bi-eye-slash');
                 toggleIcon.classList.add('bi-eye');
             } else {
-                passwordInput.type = 'password';
+                loginPasswordInput.type = 'password';
                 toggleIcon.classList.remove('bi-eye');
                 toggleIcon.classList.add('bi-eye-slash');
             }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudentPortal.Data;
 
@@ -11,9 +12,11 @@ using StudentPortal.Data;
 namespace StudentPortal.Migrations
 {
     [DbContext(typeof(ApplicationDBContext))]
-    partial class ApplicationDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241116031134_adjust")]
+    partial class adjust
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -508,13 +511,13 @@ namespace StudentPortal.Migrations
                     b.HasOne("StudentPortal.Models.Entities.Student", "Student")
                         .WithMany("EnrollmentDetails")
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("StudentPortal.Models.Entities.Subject", "Subject")
                         .WithMany()
                         .HasForeignKey("SubjectCode")
-                        .OnDelete(DeleteBehavior.NoAction)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("EnrollmentHeader");
@@ -546,7 +549,7 @@ namespace StudentPortal.Migrations
                     b.HasOne("StudentPortal.Models.Entities.Subject", "PreRequisite")
                         .WithMany()
                         .HasForeignKey("PreRequisiteCode")
-                        .OnDelete(DeleteBehavior.NoAction);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("PreRequisite");
                 });
@@ -556,7 +559,7 @@ namespace StudentPortal.Migrations
                     b.HasOne("StudentPortal.Models.Entities.Subject", "Subject")
                         .WithMany("Schedules")
                         .HasForeignKey("SubjectCode")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Subject");

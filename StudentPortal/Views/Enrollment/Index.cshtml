@@ -62,6 +62,7 @@
                                 <th>End Time</th>
                                 <th>Days</th>
                                 <th>Units</th>
+                                <th>Year</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -75,6 +76,7 @@
                                     <td>@schedule.EndTime.ToString("hh:mm tt")</td>
                                     <td>@schedule.Days</td>
                                     <td>@schedule.Subject.Units</td>
+                                    <td>@schedule.SchoolYear</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-primary select-subject"
                                                 data-edp="@schedule.EDPCode">
@@ -113,6 +115,7 @@
             </div>
         </form>
     </div>
+</div>
 </div>
 
 @section Scripts {

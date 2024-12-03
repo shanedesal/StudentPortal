@@ -1,22 +1,39 @@
 ﻿@model List<StudentPortal.Models.Entities.Subject>
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success" id="success-message">
+        @TempData["SuccessMessage"]
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger" id="error-message">
+        @TempData["ErrorMessage"]
+    </div>
+}
 
 <div class="container-fluid px-4">
     <h1 class="mt-4 mb-4">Subjects</h1>
 
     <div class="row mb-3 align-items-center">
         <div class="col-md-3">
-            <a asp-controller="Subjects" asp-action="Add" class="btn btn-dark me-2">Add Subject</a>
-            <a asp-controller="SubjectSchedules" asp-action="Add" class="btn btn-dark">Add Schedule</a>
+            <a asp-controller="Subjects" asp-action="Add" class="btn btn-dark me-2" id="add-subject-btn">Add Subject</a>
+            <a asp-controller="SubjectSchedules" asp-action="Add" class="btn btn-dark" id="add-schedule-btn">Add Schedule</a>
         </div>
         <div class="col-md-4 ms-auto">
-            <form asp-action="List" method="get" class="d-flex">
+            <form asp-action="List" method="get" class="d-flex" id="search-form">
                 <div class="input-group">
-                    <input type="text" name="searchString" class="form-control" placeholder="Search by subject code, description..."
+                    <input type="text"
+                           name="searchString"
+                           id="search-input"
+                           class="form-control"
+                           placeholder="Search by subject code, description..."
                            value="@ViewData["CurrentFilter"]" />
-                    <button type="submit" class="btn btn-dark">Search</button>
+                    <button type="submit" class="btn btn-dark" id="search-btn">Search</button>
                     @if (!string.IsNullOrEmpty((string)ViewData["CurrentFilter"]))
                     {
-                        <a asp-action="List" class="btn btn-outline-dark">Clear</a>
+                        <a asp-action="List" class="btn btn-outline-dark" id="clear-search-btn">Clear</a>
                     }
                 </div>
             </form>
@@ -25,22 +42,30 @@
 
     @if (TempData["InfoMessage"] != null)
     {
-        <div class="alert alert-info">
+        <div class="alert alert-info" id="info-message">
             @TempData["InfoMessage"]
         </div>
     }
 
     <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-hover" id="subjects-table">
             <thead class="table-dark">
                 <tr>
                     <th>
-                        <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["SubjectCodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <a class="text-white text-decoration-none"
+                           id="sort-subject-code"
+                           asp-action="List"
+                           asp-route-sortOrder="@ViewData["SubjectCodeSortParm"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]">
                             Subject Code <i class="bi bi-arrow-down-up"></i>
                         </a>
                     </th>
                     <th>
-                        <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["DescriptionSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <a class="text-white text-decoration-none"
+                           id="sort-description"
+                           asp-action="List"
+                           asp-route-sortOrder="@ViewData["DescriptionSortParm"]"
+                           asp-route-currentFilter="@ViewData["CurrentFilter"]">
                             Description <i class="bi bi-arrow-down-up"></i>
                         </a>
                     </th>
@@ -56,7 +81,7 @@
             <tbody>
                 @foreach (var subject in Model)
                 {
-                    <tr>
+                    <tr id="subject-row-@subject.SubjectCode">
                         <td>@subject.SubjectCode</td>
                         <td>@subject.Description</td>
                         <td>@subject.Units</td>
@@ -66,7 +91,11 @@
                         <td>@subject.CurriculumYear</td>
                         <td>@subject.PreRequisiteCode</td>
                         <td>
-                            <a class="btn btn-outline-dark btn-sm" asp-controller="Subjects" asp-action="Edit" asp-route-id="@subject.SubjectCode">
+                            <a class="btn btn-outline-dark btn-sm"
+                               id="edit-subject-@subject.SubjectCode"
+                               asp-controller="Subjects"
+                               asp-action="Edit"
+                               asp-route-id="@subject.SubjectCode">
                                 <i class="bi bi-pencil"></i> Edit
                             </a>
                         </td>

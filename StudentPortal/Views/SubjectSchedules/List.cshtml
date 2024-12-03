@@ -5,17 +5,17 @@
 
     <div class="row mb-3 align-items-center">
         <div class="col-md-3">
-            <a asp-controller="SubjectSchedules" asp-action="Add" class="btn btn-dark">Add Schedule</a>
+            <a id="add-schedule-btn" asp-controller="SubjectSchedules" asp-action="Add" class="btn btn-dark">Add Schedule</a>
         </div>
         <div class="col-md-4 ms-auto">
-            <form asp-action="List" method="get" class="d-flex">
+            <form id="search-schedule-form" asp-action="List" method="get" class="d-flex">
                 <div class="input-group">
-                    <input type="text" name="searchString" class="form-control" placeholder="Search by EDP code, subject, section..."
+                    <input id="search-input" type="text" name="searchString" class="form-control" placeholder="Search by EDP code, subject, section..."
                            value="@ViewData["CurrentFilter"]" />
-                    <button type="submit" class="btn btn-dark">Search</button>
+                    <button id="search-btn" type="submit" class="btn btn-dark">Search</button>
                     @if (!string.IsNullOrEmpty((string)ViewData["CurrentFilter"]))
                     {
-                        <a asp-action="List" class="btn btn-outline-dark">Clear</a>
+                        <a id="clear-search-btn" asp-action="List" class="btn btn-outline-dark">Clear</a>
                     }
                 </div>
             </form>
@@ -24,22 +24,22 @@
 
     @if (TempData["InfoMessage"] != null)
     {
-        <div class="alert alert-info">
+        <div id="info-message" class="alert alert-info">
             @TempData["InfoMessage"]
         </div>
     }
 
     <div class="table-responsive">
-        <table class="table table-hover">
+        <table id="schedules-table" class="table table-hover">
             <thead class="table-dark">
                 <tr>
                     <th>
-                        <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["EDPCodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <a id="edp-code-sort" class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["EDPCodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
                             EDP Code <i class="bi bi-arrow-down-up"></i>
                         </a>
                     </th>
                     <th>
-                        <a class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["SubjectCodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                        <a id="subject-code-sort" class="text-white text-decoration-none" asp-action="List" asp-route-sortOrder="@ViewData["SubjectCodeSortParm"]" asp-route-currentFilter="@ViewData["CurrentFilter"]">
                             Subject Code <i class="bi bi-arrow-down-up"></i>
                         </a>
                     </th>
@@ -71,7 +71,7 @@
                         <td>@schedule.Section</td>
                         <td>@schedule.SchoolYear</td>
                         <td>
-                            <a class="btn btn-outline-dark btn-sm" asp-controller="SubjectSchedules" asp-action="Edit" asp-route-id="@schedule.EDPCode">
+                            <a id="edit-schedule-@schedule.EDPCode" class="btn btn-outline-dark btn-sm" asp-controller="SubjectSchedules" asp-action="Edit" asp-route-id="@schedule.EDPCode">
                                 <i class="bi bi-pencil"></i> Edit
                             </a>
                         </td>

@@ -172,6 +172,8 @@ namespace StudentPortal.Controllers
                     SubjectCode = schedule.SubjectCode
                 };
 
+                schedule.ClassSize++;
+
                 _context.EnrollmentDetails.Add(detail);
                 header.TotalUnits = newTotalUnits;
 
@@ -238,6 +240,8 @@ namespace StudentPortal.Controllers
             {
                 header.TotalUnits -= enrollment.SubjectSchedule.Subject.Units;
             }
+
+            enrollment.SubjectSchedule.ClassSize = Math.Max(0, enrollment.SubjectSchedule.ClassSize - 1);
 
             _context.EnrollmentDetails.Remove(enrollment);
             await _context.SaveChangesAsync();

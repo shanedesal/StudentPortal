@@ -1,15 +1,15 @@
 ﻿@model StudentPortal.Models.AddSubjectViewModel
 
-<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+<div id="validationSummary" asp-validation-summary="ModelOnly" class="text-danger"></div>
 
 <div class="container py-4" style="max-width: 800px">
     <h1 class="h3 mb-4">Edit Subject</h1>
-    <form method="post">
-        
-        <input type="hidden" asp-for="SubjectCode" />
+    <form method="post" id="editSubjectForm">
+
+        <input type="hidden" asp-for="SubjectCode" id="hiddenSubjectCode" />
         <div class="mb-3">
             <div class="form-floating">
-                <input type="text" class="form-control" asp-for="SubjectCode" placeholder="Subject Code" readonly disabled/>
+                <input type="text" class="form-control" id="subjectCodeDisplay" asp-for="SubjectCode" placeholder="Subject Code" readonly disabled />
                 <label>Subject Code</label>
             </div>
         </div>
@@ -17,10 +17,10 @@
         <!-- Description -->
         <div class="mb-3">
             <div class="form-floating">
-                <textarea class="form-control" asp-for="Description" placeholder="Description"
+                <textarea class="form-control" id="descriptionInput" asp-for="Description" placeholder="Description"
                           style="height: 100px" required></textarea>
                 <label asp-for="Description">Description</label>
-                <span asp-validation-for="Description" class="text-danger"></span>
+                <span id="descriptionValidation" asp-validation-for="Description" class="text-danger"></span>
             </div>
         </div>
 
@@ -28,21 +28,21 @@
         <div class="row g-3 mb-3">
             <div class="col-md-8">
                 <div class="form-floating">
-                    <select class="form-select" asp-for="Offering" required>
+                    <select class="form-select" id="offeringSelect" asp-for="Offering" required>
                         <option value="">Select Offering</option>
                         <option value="First Semester">First Semester</option>
                         <option value="Second Semester">Second Semester</option>
                         <option value="Summer">Summer</option>
                     </select>
                     <label asp-for="Offering">Offering</label>
-                    <span asp-validation-for="Offering" class="text-danger"></span>
+                    <span id="offeringValidation" asp-validation-for="Offering" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-floating">
-                    <input type="number" class="form-control" asp-for="Units" placeholder="Units" required />
+                    <input type="number" class="form-control" id="unitsInput" asp-for="Units" placeholder="Units" required />
                     <label asp-for="Units">Units</label>
-                    <span asp-validation-for="Units" class="text-danger"></span>
+                    <span id="unitsValidation" asp-validation-for="Units" class="text-danger"></span>
                 </div>
             </div>
         </div>
@@ -51,18 +51,18 @@
         <div class="row g-3 mb-3">
             <div class="col-md-4">
                 <div class="form-floating">
-                    <select class="form-select" asp-for="CourseCode" required>
+                    <select class="form-select" id="courseCodeSelect" asp-for="CourseCode" required>
                         <option value="">Select Course</option>
                         <option value="BSIT">BSIT</option>
                         <option value="BSIS">BSIS</option>
                     </select>
                     <label asp-for="CourseCode">Course Code</label>
-                    <span asp-validation-for="CourseCode" class="text-danger"></span>
+                    <span id="courseCodeValidation" asp-validation-for="CourseCode" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-floating">
-                    <select class="form-select" asp-for="CurriculumYear" style="padding-top: 1rem;">
+                    <select class="form-select" id="curriculumYearSelect" asp-for="CurriculumYear" style="padding-top: 1rem;">
                         <option value="">Select Year</option>
                         <option value="AY2020">AY2020</option>
                         <option value="AY2021">AY2021</option>
@@ -72,18 +72,18 @@
                         <option value="AY2025">AY2025</option>
                     </select>
                     <label asp-for="CurriculumYear">Curriculum Year</label>
-                    <span asp-validation-for="CurriculumYear" class="text-danger"></span>
+                    <span id="curriculumYearValidation" asp-validation-for="CurriculumYear" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-floating">
-                    <select class="form-select" asp-for="Category" required>
+                    <select class="form-select" id="categorySelect" asp-for="Category" required>
                         <option value="">Select Category</option>
                         <option value="LAB">LAB</option>
                         <option value="LEC">LEC</option>
                     </select>
                     <label asp-for="Category">Category</label>
-                    <span asp-validation-for="Category" class="text-danger"></span>
+                    <span id="categoryValidation" asp-validation-for="Category" class="text-danger"></span>
                 </div>
             </div>
         </div>
@@ -109,14 +109,15 @@
                                 <th></th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="prerequisiteTableBody">
                             @foreach (var subject in Model.SubjectsTable)
                             {
-                                <tr class="subject-row">
+                                <tr class="subject-row" id="subject-row-@subject.SubjectCode">
                                     <td class="subject-code">@subject.SubjectCode</td>
                                     <td>@subject.Description</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-outline-primary"
+                                                id="select-@subject.SubjectCode"
                                                 onclick="selectPreRequisite('@subject.SubjectCode')">
                                             Select
                                         </button>
@@ -132,16 +133,16 @@
         <!-- Submit Button -->
         <div class="row g-3 mb-4">
             <div class="col-md-6">
-                <button type="submit" class="btn btn-outline-primary w-100 py-2">Save Changes</button>
+                <button type="submit" id="saveChangesButton" class="btn btn-outline-primary w-100 py-2">Save Changes</button>
             </div>
             <div class="col-md-6">
-                <a asp-action="List" class="btn btn-outline-dark w-100 py-2">Cancel</a>
+                <a id="cancelButton" asp-action="List" class="btn btn-outline-dark w-100 py-2">Cancel</a>
             </div>
         </div>
 
         @if (!ViewContext.ModelState.IsValid)
         {
-            <div class="alert alert-danger">
+            <div id="validationErrors" class="alert alert-danger">
                 <ul>
                     @foreach (var modelError in ViewContext.ModelState.Values.SelectMany(v => v.Errors))
                     {
@@ -154,9 +155,9 @@
     </form>
     <div class="row">
         <div class="col-12">
-            <form asp-action="Delete" asp-controller="Subjects" method="post">
-                <input type="hidden" name="code" value="@Model.SubjectCode" />
-                <button type="submit" class="btn btn-outline-danger w-100 py-2"
+            <form id="deleteSubjectForm" asp-action="Delete" asp-controller="Subjects" method="post">
+                <input type="hidden" id="deleteSubjectCode" name="code" value="@Model.SubjectCode" />
+                <button type="submit" id="deleteButton" class="btn btn-outline-danger w-100 py-2"
                         onclick="return confirm('Are you sure you want to delete this subject?');">
                     Delete
                 </button>

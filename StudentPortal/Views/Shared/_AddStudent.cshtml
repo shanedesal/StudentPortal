@@ -1,0 +1,86 @@
+﻿@model StudentPortal.Models.AddStudentViewModel
+
+<form method="post" id="addStudentForm">
+    <!-- ID -->
+    <div class="mb-3">
+        <div class="form-floating">
+            <input type="text"
+                   class="form-control"
+                   asp-for="StudentId"
+                   placeholder="ID"
+                   maxlength="8"
+                   oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8);"
+                   pattern="\d{8}"
+                   title="Please enter exactly 8 digits" id="idInput"/>
+            <label asp-for="StudentId">ID</label>
+            <span asp-validation-for="StudentId" class="text-danger"></span>
+        </div>
+    </div>
+
+    <!-- First Name -->
+    <div class="mb-3">
+        <div class="form-floating">
+            <input type="text" class="form-control" asp-for="FirstName" placeholder="First Name" id="firstNameInput"/>
+            <label asp-for="FirstName">First Name</label>
+            <span asp-validation-for="FirstName" class="text-danger"></span>
+        </div>
+    </div>
+
+    <!-- Middle Name -->
+    <div class="mb-3">
+        <div class="form-floating">
+            <input type="text" class="form-control" asp-for="MiddleName" placeholder="Middle Name" id="middleNameInput"/>
+            <label asp-for="MiddleName">Middle Name</label>
+        </div>
+    </div>
+
+    <!-- Last Name -->
+    <div class="mb-3">
+        <div class="form-floating">
+            <input type="text" class="form-control" asp-for="LastName" placeholder="Last Name" id="lastNameInput"/>
+            <label asp-for="LastName">Last Name</label>
+            <span asp-validation-for="LastName" class="text-danger"></span>
+        </div>
+    </div>
+
+    <!-- Year and Course Row -->
+    <div class="row g-3 mb-3">
+        <div class="col-md-6">
+            <div class="form-floating">
+                <select class="form-select" asp-for="Year" style="padding-top: 1rem;" id="yearDropdown">
+                    <option value="">Select Year</option>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                </select>
+                <label asp-for="Year">Year</label>
+                <span asp-validation-for="Year" class="text-danger"></span>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-floating">
+                <select class="form-select" asp-for="Course" style="padding-top: 1rem;" id="courseDropdown">
+                    <option value="">Select Course</option>
+                    <option value="BSIT">BSIT</option>
+                    <option value="BSIS">BSIS</option>
+                </select>
+                <label asp-for="Course">Course</label>
+                <span asp-validation-for="Course" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Remarks -->
+    <div class="mb-3">
+        <div class="form-floating">
+            <select class="form-select" asp-for="Remarks" style="padding-top: 1rem;" id="remarksDropdown">
+                <option value="">Select Remarks</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+            <label asp-for="Remarks">Remarks</label>
+            <span asp-validation-for="Remarks" class="text-danger"></span>
+        </div>
+    </div>
+</form>

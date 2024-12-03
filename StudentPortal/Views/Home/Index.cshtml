@@ -1,8 +1,95 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Welcome to Student Portal";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>A Website by VELAYO and GAMBOA</p>
+
+<div class="container mt-4">
+    <!-- Hero Section -->
+    <div class="row align-items-center mb-5">
+        <div class="col-md-6 text-center text-md-start">
+            <h1 class="display-4 fw-bold text-primary mb-3">Welcome to Student Portal</h1>
+            <p class="lead mb-4">Your one-stop platform for seamless course enrollment and academic management</p>
+            <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                <a asp-controller="Enrollment" asp-action="Index" class="btn btn-primary btn-lg px-4 me-md-2" id="enrollNowButton">Enroll Now</a>
+                <a asp-controller="Students" asp-action="List" class="btn btn-outline-secondary btn-lg px-4" id="viewStudentsButton">View Students</a>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <img src="~/images/image.jpeg" alt="Students studying" class="img-fluid rounded shadow-lg">
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <div class="row g-4 py-5 row-cols-1 row-cols-md-3">
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-primary bg-gradient text-white mb-3 rounded-circle p-3 d-inline-block">
+                        <i class="bi bi-book fs-2"></i>
+                    </div>
+                    <h3 class="fs-4 mb-3">Course Management</h3>
+                    <p>Browse and manage a wide range of subjects and schedules. Easy access to all your academic needs.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-primary bg-gradient text-white mb-3 rounded-circle p-3 d-inline-block">
+                        <i class="bi bi-calendar-check fs-2"></i>
+                    </div>
+                    <h3 class="fs-4 mb-3">Easy Enrollment</h3>
+                    <p>Better enrollment process with real-time schedule checking and instant confirmation.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col">
+            <div class="card h-100 border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <div class="feature-icon bg-primary bg-gradient text-white mb-3 rounded-circle p-3 d-inline-block">
+                        <i class="bi bi-person-check fs-2"></i>
+                    </div>
+                    <h3 class="fs-4 mb-3">Student Portal</h3>
+                    <p>Access your academic information, track progress, and manage your student profile all in one place.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="row">
+        <div class="col-12 text-center mb-5">
+            <div class="p-5 bg-light rounded-3">
+                <h2 class="mb-3">Ready to Get Started?</h2>
+                <p class="lead mb-4">Join our growing community of students and start your academic journey today.</p>
+                <a asp-controller="Enrollment" asp-action="Index" class="btn btn-primary btn-lg px-4" id="beginEnrollmentButton">Begin Enrollment</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Info -->
+    <div class="row">
+        <div class="col-12 text-center mb-4">
+            <p class="text-muted">Developed by VELAYO and GAMBOA</p>
+        </div>
+    </div>
 </div>
+
+<!-- Add this CSS to your site.css file -->
+<style>
+    .feature-icon {
+        width: 60px;
+        height: 60px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .card {
+        transition: transform 0.2s ease-in-out;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+    }
+</style>

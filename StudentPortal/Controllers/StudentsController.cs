@@ -23,6 +23,12 @@ namespace StudentPortal.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult GetAddView()
+        {
+            return PartialView("_AddStudent", new AddStudentViewModel());
+        }
+
         [HttpPost]
         public async Task<IActionResult> Add(AddStudentViewModel viewModel)
         {
@@ -31,13 +37,11 @@ namespace StudentPortal.Controllers
             if (existingStudent != null)
             {
                 ModelState.AddModelError("StudentId", "This Student ID already exists. Please use a different ID.");
-                return View(viewModel);
             }
 
-            // Then check other validations
             if (!ModelState.IsValid)
             {
-                return View(viewModel);
+                return PartialView("_AddStudent", viewModel);
             }
 
             var student = new Student
@@ -55,12 +59,12 @@ namespace StudentPortal.Controllers
             {
                 await dBContext.Students.AddAsync(student);
                 await dBContext.SaveChangesAsync();
-                return RedirectToAction("List", "Students");
+                return Json(new { success = true });
             }
             catch (DbUpdateException)
             {
-                ModelState.AddModelError("StudentId", "An error occurred while saving. The Student ID may be duplicate.");
-                return View(viewModel);
+                ModelState.AddModelError("", "An error occurred while saving the student.");
+                return PartialView("_AddStudent", viewModel);
             }
         }
 
@@ -92,16 +96,14 @@ namespace StudentPortal.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return View(viewModel);
+                return Json(new { success = false, errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage) });
             }
 
             try
             {
-                // Remove the existing student
                 var existingStudent = await dBContext.Students.FindAsync(viewModel.StudentId);
                 if (existingStudent != null)
                 {
-                    // Update the existing student's properties
                     existingStudent.FirstName = viewModel.FirstName;
                     existingStudent.MiddleName = viewModel.MiddleName;
                     existingStudent.LastName = viewModel.LastName;
@@ -110,15 +112,14 @@ namespace StudentPortal.Controllers
                     existingStudent.Remarks = viewModel.Remarks;
 
                     await dBContext.SaveChangesAsync();
-                    return RedirectToAction("List", "Students");
+                    return Json(new { success = true });
                 }
 
-                return NotFound();
+                return Json(new { success = false, errors = new[] { "Student not found" } });
             }
             catch (DbUpdateException)
             {
-                ModelState.AddModelError("", "An error occurred while updating the student.");
-                return View(viewModel);
+                return Json(new { success = false, errors = new[] { "An error occurred while updating the student" } });
             }
         }
 
@@ -172,6 +173,72 @@ namespace StudentPortal.Controllers
             };
 
             return View(await students.ToListAsync());
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Delete(long id)
+        {
+            using var transaction = await dBContext.Database.BeginTransactionAsync();
+            try
+            {
+                var student = await dBContext.Students
+                    .Include(s => s.EnrollmentHeaders)
+                        .ThenInclude(eh => eh.EnrollmentDetails)
+                    .FirstOrDefaultAsync(s => s.Id == id);
+
+                if (student == null)
+                {
+                    TempData["ErrorMessage"] = "Student not found.";
+                    return RedirectToAction("List");
+                }
+
+                // Delete enrollment details first
+                foreach (var header in student.EnrollmentHeaders)
+                {
+                    dBContext.EnrollmentDetails.RemoveRange(header.EnrollmentDetails);
+                }
+
+                // Delete enrollment headers
+                dBContext.EnrollmentHeaders.RemoveRange(student.EnrollmentHeaders);
+
+                // Finally delete the student
+                dBContext.Students.Remove(student);
+
+                await dBContext.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] = "Student and all related records were successfully deleted.";
+                return RedirectToAction("List");
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                TempData["ErrorMessage"] = "An error occurred while deleting the student. Please try again.";
+                // Log the exception here
+                return RedirectToAction("List");
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> GetEditView(long id)
+        {
+            var student = await dBContext.Students.FindAsync(id);
+            if (student == null)
+            {
+                return NotFound();
+            }
+
+            var viewModel = new AddStudentViewModel
+            {
+                StudentId = student.Id,
+                FirstName = student.FirstName,
+                MiddleName = student.MiddleName,
+                LastName = student.LastName,
+                Year = student.Year,
+                Course = student.Course,
+                Remarks = student.Remarks
+            };
+
+            return PartialView("_EditStudent", viewModel);
         }
     }
 }

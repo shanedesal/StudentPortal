@@ -114,10 +114,7 @@ namespace StudentPortal.Controllers
                 .Select(s => new
                 {
                     subjectCode = s.SubjectCode,
-                    description = s.Description,
-                    units = s.Units,
-                    offering = s.Offering,
-                    category = s.Category
+                    description = s.Description
                 })
                 .Take(10)
                 .ToListAsync();

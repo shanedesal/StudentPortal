@@ -14,13 +14,13 @@
 
         <div class="form-group">
             <label asp-for="Email" class="form-label"></label>
-            <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+            <input asp-for="Email" class="form-control" placeholder="Enter your email" id="verEmail"/>
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
 
         <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">Verify</button>
-            <a asp-action="Login" asp-controller="Account" class="btn btn-outline-secondary">Back</a>
+            <button type="submit" class="btn btn-primary" id="verVerifyButton">Verify</button>
+            <a asp-action="Login" asp-controller="Account" class="btn btn-outline-secondary" id="verBackButton">Back</a>
         </div>
     </form>
 </div>

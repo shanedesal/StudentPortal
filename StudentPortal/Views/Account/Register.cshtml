@@ -14,20 +14,20 @@
 
         <div class="form-group">
             <label asp-for="Name" class="form-label"></label>
-            <input asp-for="Name" class="form-control" placeholder="Enter your name" />
+            <input asp-for="Name" class="form-control" placeholder="Enter your name" id="regName"/>
             <span asp-validation-for="Name" class="text-danger"></span>
         </div>
 
         <div class="form-group">
             <label asp-for="Email" class="form-label"></label>
-            <input asp-for="Email" class="form-control" placeholder="Enter your email" />
+            <input asp-for="Email" class="form-control" placeholder="Enter your email" id="regEmail"/>
             <span asp-validation-for="Email" class="text-danger"></span>
         </div>
 
         <div class="form-group">
             <label asp-for="Password" class="form-label"></label>
             <div class="input-group">
-                <input asp-for="Password" class="form-control" placeholder="Enter your password" type="password" id="passwordInput" />
+                <input asp-for="Password" class="form-control" placeholder="Enter your password" type="password" id="regPasswordInput" />
                 <span class="input-group-text">
                     <button type="button" class="btn toggle-password-btn" id="togglePassword">
                         <i class="bi bi-eye-slash fs-5" id="toggleIcon"></i>
@@ -40,7 +40,7 @@
         <div class="form-group">
             <label asp-for="ConfirmPassword" class="form-label"></label>
             <div class="input-group">
-                <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm your password" type="password" id="confirmPasswordInput" />
+                <input asp-for="ConfirmPassword" class="form-control" placeholder="Confirm your password" type="password" id="regConfirmPasswordInput" />
                 <span class="input-group-text">
                     <button type="button" class="btn toggle-password-btn" id="toggleConfirmPassword">
                         <i class="bi bi-eye-slash fs-5" id="toggleConfirmIcon"></i>
@@ -51,14 +51,14 @@
         </div>
 
         <div class="d-grid gap-2">
-            <button type="submit" class="btn btn-primary">Register</button>
-            <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary">Back</a>
+            <button type="submit" class="btn btn-primary" id="regRegisterButton">Register</button>
+            <a asp-action="Index" asp-controller="Home" class="btn btn-outline-secondary" id="regBackButton">Back</a>
         </div>
     </form>
 
     <div class="text-center mt-4">
         <span>Already have an account? </span>
-        <a asp-action="Login" asp-controller="Account" class="text-decoration-none">Login here</a>
+        <a asp-action="Login" asp-controller="Account" class="text-decoration-none" id="regLoginHereButton">Login here</a>
     </div>
 </div>
 
@@ -121,15 +121,15 @@
         function createPasswordToggle(inputId, toggleId, iconId) {
             document.getElementById(toggleId).addEventListener('click', function (e) {
                 e.preventDefault();
-                const passwordInput = document.getElementById(inputId);
+                const regPasswordInput = document.getElementById(inputId);
                 const toggleIcon = document.getElementById(iconId);
 
-                if (passwordInput.type === 'password') {
-                    passwordInput.type = 'text';
+                if (regPasswordInput.type === 'password') {
+                    regPasswordInput.type = 'text';
                     toggleIcon.classList.remove('bi-eye-slash');
                     toggleIcon.classList.add('bi-eye');
                 } else {
-                    passwordInput.type = 'password';
+                    regPasswordInput.type = 'password';
                     toggleIcon.classList.remove('bi-eye');
                     toggleIcon.classList.add('bi-eye-slash');
                 }
@@ -137,11 +137,11 @@
         }
 
         // Initialize password toggles for all password fields
-        if (document.getElementById('passwordInput')) {
-            createPasswordToggle('passwordInput', 'togglePassword', 'toggleIcon');
+        if (document.getElementById('regPasswordInput')) {
+            createPasswordToggle('regPasswordInput', 'togglePassword', 'toggleIcon');
         }
-        if (document.getElementById('confirmPasswordInput')) {
-            createPasswordToggle('confirmPasswordInput', 'toggleConfirmPassword', 'toggleConfirmIcon');
+        if (document.getElementById('regConfirmPasswordInput')) {
+            createPasswordToggle('regConfirmPasswordInput', 'toggleConfirmPassword', 'toggleConfirmIcon');
         }
         if (document.getElementById('newPasswordInput')) {
             createPasswordToggle('newPasswordInput', 'toggleNewPassword', 'toggleNewIcon');

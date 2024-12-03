@@ -2,23 +2,23 @@
 
 <div class="container py-4" style="max-width: 800px">
     <h1 class="h3 mb-4">Add Subject</h1>
-    <form method="post">
+    <form method="post" id="addSubjectForm">
         <!-- Subject Code -->
         <div class="mb-3">
             <div class="form-floating">
-                <input type="text" class="form-control" asp-for="SubjectCode" placeholder="Subject Code" required />
+                <input type="text" class="form-control" id="subjectCodeInput" asp-for="SubjectCode" placeholder="Subject Code" required />
                 <label asp-for="SubjectCode">Subject Code</label>
-                <span asp-validation-for="SubjectCode" class="text-danger"></span>
+                <span id="subjectCodeValidation" asp-validation-for="SubjectCode" class="text-danger"></span>
             </div>
         </div>
 
         <!-- Description -->
         <div class="mb-3">
             <div class="form-floating">
-                <textarea class="form-control" asp-for="Description" placeholder="Description"
+                <textarea class="form-control" id="descriptionInput" asp-for="Description" placeholder="Description"
                           style="height: 100px" required></textarea>
                 <label asp-for="Description">Description</label>
-                <span asp-validation-for="Description" class="text-danger"></span>
+                <span id="descriptionValidation" asp-validation-for="Description" class="text-danger"></span>
             </div>
         </div>
 
@@ -26,19 +26,19 @@
         <div class="row g-3 mb-3">
             <div class="col-md-8">
                 <div class="form-floating">
-                    <select class="form-select" asp-for="Offering" required>
+                    <select class="form-select" id="offeringSelect" asp-for="Offering" required>
                         <option value="">Select Offering</option>
                         <option value="First Semester">First Semester</option>
                         <option value="Second Semester">Second Semester</option>
                         <option value="Summer">Summer</option>
                     </select>
                     <label asp-for="Offering">Offering</label>
-                    <span asp-validation-for="Offering" class="text-danger"></span>
+                    <span id="offeringValidation" asp-validation-for="Offering" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-floating">
-                    <select class="form-select" asp-for="Units" required>
+                    <select class="form-select" id="unitsSelect" asp-for="Units" required>
                         <option value="">Select Units</option>
                         <option value=1>1.0</option>
                         <option value=2>2.0</option>
@@ -46,7 +46,7 @@
                         <option value=4>4.0</option>
                     </select>
                     <label asp-for="Units">Units</label>
-                    <span asp-validation-for="Units" class="text-danger"></span>
+                    <span id="unitsValidation" asp-validation-for="Units" class="text-danger"></span>
                 </div>
             </div>
         </div>
@@ -55,18 +55,18 @@
         <div class="row g-3 mb-3">
             <div class="col-md-4">
                 <div class="form-floating">
-                    <select class="form-select" asp-for="CourseCode" required>
+                    <select class="form-select" id="courseCodeSelect" asp-for="CourseCode" required>
                         <option value="">Select Course</option>
                         <option value="BSIT">BSIT</option>
                         <option value="BSIS">BSIS</option>
                     </select>
                     <label asp-for="CourseCode">Course Code</label>
-                    <span asp-validation-for="CourseCode" class="text-danger"></span>
+                    <span id="courseCodeValidation" asp-validation-for="CourseCode" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-floating">
-                    <select class="form-select" asp-for="CurriculumYear" style="padding-top: 1rem;">
+                    <select class="form-select" id="curriculumYearSelect" asp-for="CurriculumYear" style="padding-top: 1rem;">
                         <option value="">Select Year</option>
                         <option value="AY2020">AY2020</option>
                         <option value="AY2021">AY2021</option>
@@ -76,18 +76,18 @@
                         <option value="AY2025">AY2025</option>
                     </select>
                     <label asp-for="CurriculumYear">Curriculum Year</label>
-                    <span asp-validation-for="CurriculumYear" class="text-danger"></span>
+                    <span id="curriculumYearValidation" asp-validation-for="CurriculumYear" class="text-danger"></span>
                 </div>
             </div>
             <div class="col-md-4">
                 <div class="form-floating">
-                    <select class="form-select" asp-for="Category" required>
+                    <select class="form-select" id="categorySelect" asp-for="Category" required>
                         <option value="">Select Category</option>
                         <option value="LAB">LAB</option>
                         <option value="LEC">LEC</option>
                     </select>
                     <label asp-for="Category">Category</label>
-                    <span asp-validation-for="Category" class="text-danger"></span>
+                    <span id="categoryValidation" asp-validation-for="Category" class="text-danger"></span>
                 </div>
             </div>
         </div>
@@ -99,6 +99,7 @@
                        id="PreRequisiteCode" placeholder="Pre-Requisite"
                        oninput="filterPreRequisite()" />
                 <label asp-for="PreRequisiteCode">Pre-Requisite (Optional)</label>
+                <span id="prerequisiteValidation" asp-validation-for="PreRequisiteCode" class="text-danger"></span>
             </div>
 
             <!-- Pre-Requisite Results -->
@@ -113,7 +114,7 @@
                                 <th></th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody id="prerequisiteTableBody">
                             @foreach (var subject in Model.SubjectsTable)
                             {
                                 <tr class="subject-row">
@@ -121,6 +122,7 @@
                                     <td>@subject.Description</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-outline-primary"
+                                                id="select-@subject.SubjectCode"
                                                 onclick="selectPreRequisite('@subject.SubjectCode')">
                                             Select
                                         </button>
@@ -136,10 +138,10 @@
         <!-- Submit Button -->
         <div class="row g-3">
             <div class="col-md-6">
-                <button type="submit" class="btn btn-outline-primary w-100 py-2">Save</button>
+                <button type="submit" id="saveButton" class="btn btn-outline-primary w-100 py-2">Save</button>
             </div>
             <div class="col-md-6">
-                <a asp-action="List" asp-controller="Subjects" class="btn btn-outline-secondary w-100 py-2">Cancel</a>
+                <a id="cancelButton" asp-action="List" asp-controller="Subjects" class="btn btn-outline-secondary w-100 py-2">Cancel</a>
             </div>
         </div>
     </form>

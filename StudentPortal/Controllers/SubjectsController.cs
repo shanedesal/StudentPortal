@@ -265,15 +265,87 @@ namespace StudentPortal.Controllers
         [HttpPost]
         public async Task<IActionResult> Delete(string code)
         {
-            var subject = await dBContext.Subjects.FindAsync(code);
-
-            if (subject != null)
+            try
             {
-                dBContext.Subjects.Remove(subject);
-                await dBContext.SaveChangesAsync();
+                var subject = await dBContext.Subjects
+                    .Include(s => s.Schedules)
+                        .ThenInclude(ss => ss.EnrollmentDetails)
+                    .FirstOrDefaultAsync(s => s.SubjectCode == code);
+
+                if (subject == null)
+                {
+                    TempData["ErrorMessage"] = "Subject not found.";
+                    return RedirectToAction("List");
+                }
+
+                // Check if this subject is a prerequisite for other subjects
+                var isPrerequisite = await dBContext.Subjects
+                    .AnyAsync(s => s.PreRequisiteCode == code);
+
+                if (isPrerequisite)
+                {
+                    TempData["ErrorMessage"] = "Cannot delete subject as it is a prerequisite for other subjects. Please update those subjects first.";
+                    return RedirectToAction("List");
+                }
+
+                // Begin transaction
+                using var transaction = await dBContext.Database.BeginTransactionAsync();
+                try
+                {
+                    // Remove all related enrollment details first
+                    foreach (var schedule in subject.Schedules)
+                    {
+                        if (schedule.EnrollmentDetails.Any())
+                        {
+                            var enrollmentDetails = schedule.EnrollmentDetails.ToList();
+                            foreach (var detail in enrollmentDetails)
+                            {
+                                // Get the enrollment header
+                                var header = await dBContext.EnrollmentHeaders
+                                    .Include(eh => eh.EnrollmentDetails)
+                                    .FirstOrDefaultAsync(eh => eh.Id == detail.EnrollmentHeaderId);
+
+                                if (header != null)
+                                {
+                                    // Update the total units in the header
+                                    header.TotalUnits -= subject.Units;
+                                    dBContext.EnrollmentDetails.Remove(detail);
+
+                                    // If this was the last subject in the enrollment, remove the header too
+                                    if (header.EnrollmentDetails.Count <= 1)  // 1 because current detail isn't removed yet
+                                    {
+                                        dBContext.EnrollmentHeaders.Remove(header);
+                                    }
+                                    else
+                                    {
+                                        dBContext.EnrollmentHeaders.Update(header);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    // Remove the subject (this will cascade delete schedules due to our DbContext configuration)
+                    dBContext.Subjects.Remove(subject);
+
+                    await dBContext.SaveChangesAsync();
+                    await transaction.CommitAsync();
+
+                    TempData["SuccessMessage"] = "Subject and all related records were successfully deleted.";
+                }
+                catch (Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw; // Re-throw to be caught by outer try-catch
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["ErrorMessage"] = "An error occurred while deleting the subject. Please try again.";
+                // Log the exception details here
             }
 
-            return RedirectToAction("List", "Subjects");
+            return RedirectToAction("List");
         }
 
     }
